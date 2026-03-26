@@ -1,5 +1,9 @@
+from machine_learning.lstm import lstm
+
+SCATS_DATA_PATH = "data/scats_data_october_2006.xls"
+
 def main():
-    print("Hello from cos30019-assignment-3!")
+    lstm(SCATS_DATA_PATH)
 
 
 if __name__ == "__main__":
