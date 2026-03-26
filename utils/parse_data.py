@@ -31,10 +31,14 @@ def parse_scats_data(path):
     #     if np.isnan(series).any():
     #         print(f"Missing value in {site}")
 
+    return site_time_series
+
+def normalize_data(series):
     scalers = {}
     scaled_series = {}
 
-    for site, series in site_time_series.items():
+    # Normalize data
+    for site, series in series.items():
         scaler = MinMaxScaler()
         series = series.reshape(-1, 1)
 
@@ -42,7 +46,7 @@ def parse_scats_data(path):
         scalers[site] = scaler
         scaled_series[site] = scaled
 
-    return scaled_series
+    return scaled_series, scalers
 
 def parse_scats_sites(path):
     df = pd.read_excel(path, sheet_name="SCATS Site Numbers", header=9, engine="openpyxl")
@@ -60,6 +64,16 @@ def create_training_data(series, window_size=4):
         y.append(series[i + window_size])
 
     return np.array(X), np.array(y)
+
+def create_training_data_for_all_sites(scaled_series, window_size=4):
+    all_X, all_y = [], []
+
+    for site, series in scaled_series.items():
+        X, y = create_training_data(series, window_size)
+        all_X.append(X)
+        all_y.append(y)
+
+    return np.vstack(all_X), np.vstack(all_y)
 
 # series = parse_scats_data(scats_file_path)
 # X, y = create_training_data(series[970], window_size=4)
