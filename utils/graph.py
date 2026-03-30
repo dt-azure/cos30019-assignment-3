@@ -43,7 +43,7 @@ class BoroondaraGraph:
 
     def haversine_heuristic(self, current_node, goal_node):
         """
-        A* Heuristic: Straight-line time estimate in seconds.
+        Heuristic: Straight-line time estimate in seconds.
         """
         if current_node not in self.nodes or goal_node not in self.nodes:
             return 0
@@ -66,3 +66,24 @@ class BoroondaraGraph:
 
     def get_neighbors(self, node):
         return self.adj.get(node, {}).items()
+    
+class BoroondaraProblem:
+    def __init__(self, initial, goals, graph):
+        self.initial = initial
+        self.goals = goals
+        self.graph = graph
+
+    def actions(self, state):
+        # Returns Site IDs connected to the current state
+        return list(self.graph.adj.get(state, {}).keys())
+
+    def goal_test(self, state):
+        return state in self.goals
+
+    def path_cost(self, cost_so_far, state1, action, state2):
+        # Gets the travel time (seconds) from the adjacency list
+        return cost_so_far + self.graph.adj[state1][state2]
+
+    def h(self, node):
+        # Returns the minimum time to any of the goal nodes
+        return min(self.graph.haversine_heuristic(node.state, g) for g in self.goals)
