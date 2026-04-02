@@ -3,6 +3,10 @@ DEFAULT_WINDOW_SIZE = 4
 DEFAULT_TEST_RATIO = 0.2
 DEFAULT_VALIDATION_RATIO = 0.2
 SAVED_MODELS_DIR = "saved_models"
+RAW_TOPOLOGY_LOCATIONS_CSV = "data/Traffic_Count_Locations_with_LONG_LAT.csv"
+DEFAULT_TOPOLOGY_LOCATIONS_CSV = "data/boroondara_locations.csv"
+DEFAULT_TOPOLOGY_CONNECTIVITY_CSV = "data/boroondara_connectivity.csv"
+SAMPLE_TOPOLOGY_LOCATIONS_CSV = "data/boroondara_locations_sample.csv"
+SAMPLE_TOPOLOGY_CONNECTIVITY_CSV = "data/boroondara_connectivity_sample.csv"
 SEQUENCE_MODEL_TYPES = {"lstm", "gru"}
 TABULAR_MODEL_TYPES = {"lightgbm"}
-

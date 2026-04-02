@@ -14,10 +14,12 @@ from machine_learning.common.site_flow_service import (
 from machine_learning.common.topology_service import (
     DEFAULT_CONNECTIVITY_CSV,
     DEFAULT_LOCATIONS_CSV,
+    SAMPLE_CONNECTIVITY_CSV,
+    SAMPLE_LOCATIONS_CSV,
     load_connectivity_list,
 )
 
-DEFAULT_SAMPLE_CONNECTIVITY = load_connectivity_list(DEFAULT_CONNECTIVITY_CSV)
+DEFAULT_SAMPLE_CONNECTIVITY = load_connectivity_list(SAMPLE_CONNECTIVITY_CSV)
 
 
 def run_check(name, fn):
@@ -57,7 +59,7 @@ def check_predict_all_sites():
 
 def check_build_dynamic_graph():
     graph, predicted_flows, model_bundle, recent_windows = load_bundle_windows_and_graph(
-        DEFAULT_LOCATIONS_CSV,
+        SAMPLE_LOCATIONS_CSV,
         DEFAULT_SAMPLE_CONNECTIVITY,
     )
     assert predicted_flows
@@ -70,7 +72,7 @@ def check_build_dynamic_graph():
 def check_build_dynamic_problem():
     problem, graph, predicted_flows, model_bundle, recent_windows = (
         load_bundle_windows_graph_and_problem(
-            DEFAULT_LOCATIONS_CSV,
+            SAMPLE_LOCATIONS_CSV,
             DEFAULT_SAMPLE_CONNECTIVITY,
             origin_site_id=2000,
             destination_site_ids=3002,
@@ -85,7 +87,12 @@ def check_build_dynamic_problem():
 
 
 def check_single_best_route():
-    route_result, goal_node, *_ = compute_terminal_route(2000, 3002)
+    route_result, goal_node, *_ = compute_terminal_route(
+        2000,
+        3002,
+        locations_csv=SAMPLE_LOCATIONS_CSV,
+        connectivity_csv=SAMPLE_CONNECTIVITY_CSV,
+    )
     assert route_result["path"] == [2000, 3120, 3001, 3002]
     assert route_result["goal_site_id"] == 3002
     assert route_result["total_travel_time_sec"] > 0
@@ -93,7 +100,13 @@ def check_single_best_route():
 
 
 def check_top_k_routes():
-    route_results, goal_nodes, *_ = compute_terminal_routes(2000, 3002, top_k=5)
+    route_results, goal_nodes, *_ = compute_terminal_routes(
+        2000,
+        3002,
+        top_k=5,
+        locations_csv=SAMPLE_LOCATIONS_CSV,
+        connectivity_csv=SAMPLE_CONNECTIVITY_CSV,
+    )
     assert 1 <= len(route_results) <= 5
     assert len(route_results) == 2
     costs = [route["total_travel_time_sec"] for route in route_results]
@@ -106,25 +119,65 @@ def check_top_k_routes():
 
 
 def check_invalid_origin():
-    expect_raises(KeyError, lambda: compute_terminal_route(999999, 3002))
+    expect_raises(
+        KeyError,
+        lambda: compute_terminal_route(
+            999999,
+            3002,
+            locations_csv=SAMPLE_LOCATIONS_CSV,
+            connectivity_csv=SAMPLE_CONNECTIVITY_CSV,
+        ),
+    )
 
 
 def check_invalid_destination():
-    expect_raises(KeyError, lambda: compute_terminal_route(2000, 999999))
+    expect_raises(
+        KeyError,
+        lambda: compute_terminal_route(
+            2000,
+            999999,
+            locations_csv=SAMPLE_LOCATIONS_CSV,
+            connectivity_csv=SAMPLE_CONNECTIVITY_CSV,
+        ),
+    )
 
 
 def check_origin_equals_destination():
-    expect_raises(ValueError, lambda: compute_terminal_route(2000, 2000))
+    expect_raises(
+        ValueError,
+        lambda: compute_terminal_route(
+            2000,
+            2000,
+            locations_csv=SAMPLE_LOCATIONS_CSV,
+            connectivity_csv=SAMPLE_CONNECTIVITY_CSV,
+        ),
+    )
 
 
 def check_no_route():
-    expect_raises(ValueError, lambda: compute_terminal_routes(2000, 4030, top_k=5))
+    expect_raises(
+        ValueError,
+        lambda: compute_terminal_routes(
+            2000,
+            4030,
+            top_k=5,
+            locations_csv=SAMPLE_LOCATIONS_CSV,
+            connectivity_csv=SAMPLE_CONNECTIVITY_CSV,
+        ),
+    )
+
+
+def check_real_default_topology_files():
+    assert DEFAULT_LOCATIONS_CSV != SAMPLE_LOCATIONS_CSV
+    assert DEFAULT_CONNECTIVITY_CSV != SAMPLE_CONNECTIVITY_CSV
+    assert load_connectivity_list(DEFAULT_CONNECTIVITY_CSV)
 
 
 def main():
     checks = [
         ("load saved model", check_load_saved_model),
         ("predict all sites", check_predict_all_sites),
+        ("real default topology files", check_real_default_topology_files),
         ("build dynamic graph", check_build_dynamic_graph),
         ("build dynamic routing problem", check_build_dynamic_problem),
         ("solve single best route", check_single_best_route),

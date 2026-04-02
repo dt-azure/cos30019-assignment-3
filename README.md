@@ -32,6 +32,12 @@ Load the saved default prediction bundle later:
 
 ### Run Dynamic Routing From Terminal
 
+Regenerate the default real topology files before routing if needed:
+
+```bash
+./.venv/bin/python scripts/prepare_real_topology.py
+```
+
 Single best route:
 
 ```bash

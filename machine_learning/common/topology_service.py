@@ -1,8 +1,17 @@
 import csv
 from pathlib import Path
 
-DEFAULT_LOCATIONS_CSV = "data/boroondara_locations_sample.csv"
-DEFAULT_CONNECTIVITY_CSV = "data/boroondara_connectivity_sample.csv"
+from machine_learning.common.config import (
+    DEFAULT_TOPOLOGY_CONNECTIVITY_CSV,
+    DEFAULT_TOPOLOGY_LOCATIONS_CSV,
+    SAMPLE_TOPOLOGY_CONNECTIVITY_CSV,
+    SAMPLE_TOPOLOGY_LOCATIONS_CSV,
+)
+
+DEFAULT_LOCATIONS_CSV = DEFAULT_TOPOLOGY_LOCATIONS_CSV
+DEFAULT_CONNECTIVITY_CSV = DEFAULT_TOPOLOGY_CONNECTIVITY_CSV
+SAMPLE_LOCATIONS_CSV = SAMPLE_TOPOLOGY_LOCATIONS_CSV
+SAMPLE_CONNECTIVITY_CSV = SAMPLE_TOPOLOGY_CONNECTIVITY_CSV
 
 
 def get_default_topology_paths():
@@ -41,4 +50,3 @@ def validate_locations_csv(locations_csv=DEFAULT_LOCATIONS_CSV):
         raise FileNotFoundError(f"Locations file not found: {locations_csv}")
 
     return locations_csv
-
