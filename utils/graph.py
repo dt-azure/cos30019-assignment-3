@@ -1,6 +1,7 @@
 import pandas as pd
 from math import radians, cos, sin, asin, sqrt
-from calculations import calculate_travel_time
+
+from utils.calculations import calculate_travel_time
 
 class BoroondaraGraph:
     def __init__(self, locations_csv, connectivity_list):
@@ -25,7 +26,7 @@ class BoroondaraGraph:
 
     def update_edge_costs(self, predicted_flows):
         """
-        Re-calculates the travel time for every edge based on new LSTM predictions.
+        Re-calculates the travel time for every edge based on predicted flows.
         predicted_flows: dict {SiteID: flow_value}
         """
         self.adj = {} # Reset adjacency list
