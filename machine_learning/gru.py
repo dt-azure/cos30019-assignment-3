@@ -1,49 +1,3 @@
-# from utils.parse_data import parse_scats_data, create_training_data_for_all_sites, normalize_data
-# from sklearn.metrics import mean_absolute_error, mean_squared_error
-# import numpy as np
-# from tensorflow import keras
-# from tensorflow.keras import layers
-
-# SCATS_DATA_PATH = "data/scats_data_october_2006.xls"
-
-# def lstm(path):
-#     series = parse_scats_data(path)
-#     scaled_series, scalers = normalize_data(series)
-#     X, y = create_training_data_for_all_sites(scaled_series)
-
-#     # Build model
-#     model = keras.Sequential([
-#         layers.LSTM(50, input_shape=(4, 1)),
-#         layers.Dense(1)
-#     ])
-
-#     # Compile model
-#     model.compile(
-#         optimizer='adam',
-#         loss='mse'
-#     )
-
-#     # Train model
-#     history = model.fit(
-#         X,
-#         y,
-#         epochs=5,
-#         batch_size=32,
-#         validation_split=0.2
-#     )
-
-#     predictions = model.predict(X[:5])
-
-#     # Inverse scaling (because MinMaxScaler was used)
-#     predictions = scalers[970].inverse_transform(predictions)
-#     actual = scalers[970].inverse_transform(y[:5])
-
-#     for i in range(5):
-#         print(f"Predicted: {predictions[i][0]:.2f}, Actual: {actual[i][0]:.2f}")
-
-# if __name__ == "__main__":
-#     lstm(SCATS_DATA_PATH)
-
 from utils.parse_data import parse_scats_data, create_training_data_for_all_sites, normalize_data
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 import numpy as np
@@ -54,8 +8,8 @@ import time
 SCATS_DATA_PATH = "data/scats_data_october_2006.xls"
 
 
-def lstm(path):
-    print("\n========== LSTM MODEL ==========")
+def gru(path):
+    print("\n========== GRU MODEL ==========")
 
     # Load and prepare data
     series = parse_scats_data(path)
@@ -68,7 +22,7 @@ def lstm(path):
     print(f"Original X shape: {X.shape}")
     print(f"Original y shape: {y.shape}")
 
-    # Ensure correct shape for LSTM: (samples, timesteps, features)
+    # Ensure correct shape for GRU: (samples, timesteps, features)
     if len(X.shape) == 2:
         X = X.reshape((X.shape[0], X.shape[1], 1))
 
@@ -82,7 +36,7 @@ def lstm(path):
     # Build model
     model = keras.Sequential([
         keras.Input(shape=(X.shape[1], X.shape[2])),
-        layers.LSTM(50),
+        layers.GRU(50),
         layers.Dense(1)
     ])
 
@@ -113,9 +67,7 @@ def lstm(path):
     # Predict on all data for evaluation
     pred_all = model.predict(X, verbose=0)
 
-    # NOTE:
-    # Keeping scaler[970] based on your current logic.
-    # You should verify later whether all compared samples should use this scaler.
+    # Keeping same scaler logic as your LSTM version for fair comparison
     pred_all_inv = scalers[970].inverse_transform(pred_all)
     y_all_inv = scalers[970].inverse_transform(y)
 
@@ -149,7 +101,7 @@ def lstm(path):
 
     # Return everything needed for later comparison
     results = {
-        "model": "LSTM",
+        "model": "GRU",
         "train_loss": float(final_train_loss),
         "val_loss": float(final_val_loss),
         "mae": float(mae),
@@ -164,7 +116,7 @@ def lstm(path):
 
 
 if __name__ == "__main__":
-    model, results = lstm(SCATS_DATA_PATH)
+    model, results = gru(SCATS_DATA_PATH)
 
     print("\n========== RESULTS DICTIONARY ==========")
     for key, value in results.items():
