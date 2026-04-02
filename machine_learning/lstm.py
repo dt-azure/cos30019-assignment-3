@@ -1,171 +1,146 @@
-# from utils.parse_data import parse_scats_data, create_training_data_for_all_sites, normalize_data
-# from sklearn.metrics import mean_absolute_error, mean_squared_error
-# import numpy as np
-# from tensorflow import keras
-# from tensorflow.keras import layers
-
-# SCATS_DATA_PATH = "data/scats_data_october_2006.xls"
-
-# def lstm(path):
-#     series = parse_scats_data(path)
-#     scaled_series, scalers = normalize_data(series)
-#     X, y = create_training_data_for_all_sites(scaled_series)
-
-#     # Build model
-#     model = keras.Sequential([
-#         layers.LSTM(50, input_shape=(4, 1)),
-#         layers.Dense(1)
-#     ])
-
-#     # Compile model
-#     model.compile(
-#         optimizer='adam',
-#         loss='mse'
-#     )
-
-#     # Train model
-#     history = model.fit(
-#         X,
-#         y,
-#         epochs=5,
-#         batch_size=32,
-#         validation_split=0.2
-#     )
-
-#     predictions = model.predict(X[:5])
-
-#     # Inverse scaling (because MinMaxScaler was used)
-#     predictions = scalers[970].inverse_transform(predictions)
-#     actual = scalers[970].inverse_transform(y[:5])
-
-#     for i in range(5):
-#         print(f"Predicted: {predictions[i][0]:.2f}, Actual: {actual[i][0]:.2f}")
-
-# if __name__ == "__main__":
-#     lstm(SCATS_DATA_PATH)
-
-from utils.parse_data import parse_scats_data, create_training_data_for_all_sites, normalize_data
-from sklearn.metrics import mean_absolute_error, mean_squared_error
-import numpy as np
-from tensorflow import keras
-from tensorflow.keras import layers
 import time
 
-SCATS_DATA_PATH = "data/scats_data_october_2006.xls"
+from tensorflow import keras
+from tensorflow.keras import layers
+
+from machine_learning.common.config import (
+    DEFAULT_TEST_RATIO,
+    DEFAULT_VALIDATION_RATIO,
+    DEFAULT_WINDOW_SIZE,
+    SCATS_DATA_PATH,
+)
+from machine_learning.common.data_pipeline import load_and_split_data
+from machine_learning.common.evaluation import build_results
+from machine_learning.common.persistence import (
+    build_model_bundle,
+    get_default_model_paths,
+    load_model_bundle,
+    save_model_bundle,
+)
+
+MODEL_NAME = "LSTM"
+MODEL_TYPE = "lstm"
+DEFAULT_MODEL_PATH, DEFAULT_METADATA_PATH = get_default_model_paths(MODEL_TYPE)
 
 
-def lstm(path):
+def build_lstm_model(input_shape):
+    model = keras.Sequential(
+        [
+            keras.Input(shape=input_shape),
+            layers.LSTM(50),
+            layers.Dense(1),
+        ]
+    )
+
+    model.compile(optimizer="adam", loss="mse")
+    return model
+
+
+def train_lstm(
+    path=SCATS_DATA_PATH,
+    window_size=DEFAULT_WINDOW_SIZE,
+    test_ratio=DEFAULT_TEST_RATIO,
+    validation_ratio=DEFAULT_VALIDATION_RATIO,
+    epochs=5,
+    batch_size=32,
+    save=False,
+    model_path=None,
+    metadata_path=None,
+):
     print("\n========== LSTM MODEL ==========")
 
-    # Load and prepare data
-    series = parse_scats_data(path)
-    scaled_series, scalers = normalize_data(series)
-    X, y = create_training_data_for_all_sites(scaled_series)
-
-    X = np.array(X)
-    y = np.array(y)
-
-    print(f"Original X shape: {X.shape}")
-    print(f"Original y shape: {y.shape}")
-
-    # Ensure correct shape for LSTM: (samples, timesteps, features)
-    if len(X.shape) == 2:
-        X = X.reshape((X.shape[0], X.shape[1], 1))
-
-    # Ensure y is 2D for inverse_transform later
-    if len(y.shape) == 1:
-        y = y.reshape(-1, 1)
-
-    print(f"Reshaped X shape: {X.shape}")
-    print(f"Reshaped y shape: {y.shape}")
-
-    # Build model
-    model = keras.Sequential([
-        keras.Input(shape=(X.shape[1], X.shape[2])),
-        layers.LSTM(50),
-        layers.Dense(1)
-    ])
-
-    # Compile model
-    model.compile(
-        optimizer="adam",
-        loss="mse"
+    data = load_and_split_data(
+        path=path,
+        window_size=window_size,
+        test_ratio=test_ratio,
+        validation_ratio=validation_ratio,
     )
 
-    print("\nModel summary:")
-    model.summary()
+    X_train = data["X_train"]
+    y_train = data["y_train"]
+    X_val = data["X_val"]
+    y_val = data["y_val"]
+    X_test = data["X_test"]
+    y_test = data["y_test"]
+    validation_data = (X_val, y_val) if len(X_val) else None
 
-    # Train model
+    print(f"Train X shape: {X_train.shape}")
+    print(f"Val X shape:   {X_val.shape}")
+    print(f"Test X shape:  {X_test.shape}")
+
+    model = build_lstm_model((X_train.shape[1], X_train.shape[2]))
+
     start_time = time.time()
-
     history = model.fit(
-        X,
-        y,
-        epochs=5,
-        batch_size=32,
-        validation_split=0.2,
-        verbose=1
+        X_train,
+        y_train,
+        validation_data=validation_data,
+        epochs=epochs,
+        batch_size=batch_size,
+        verbose=1,
+        # Keep sample order fixed because the windows come from time series data.
+        shuffle=False,
+    )
+    training_time = time.time() - start_time
+
+    predictions = model.predict(X_test, verbose=0)
+    final_train_loss = history.history["loss"][-1]
+    final_val_loss = history.history.get("val_loss", [None])[-1]
+
+    results = build_results(
+        model_name=MODEL_NAME,
+        predictions=predictions,
+        actual_values=y_test,
+        test_site_ids=data["test_site_ids"],
+        scalers=data["scalers"],
+        training_time_sec=training_time,
+        train_loss=final_train_loss,
+        val_loss=final_val_loss,
     )
 
-    end_time = time.time()
-    training_time = end_time - start_time
+    model_bundle = build_model_bundle(
+        model=model,
+        model_name=MODEL_NAME,
+        model_type=MODEL_TYPE,
+        scalers=data["scalers"],
+        window_size=window_size,
+        data_path=path,
+        test_ratio=test_ratio,
+        validation_ratio=validation_ratio,
+    )
 
-    # Predict on all data for evaluation
-    pred_all = model.predict(X, verbose=0)
+    if save:
+        model_bundle.update(save_lstm_model(model_bundle, model_path, metadata_path))
 
-    # NOTE:
-    # Keeping scaler[970] based on your current logic.
-    # You should verify later whether all compared samples should use this scaler.
-    pred_all_inv = scalers[970].inverse_transform(pred_all)
-    y_all_inv = scalers[970].inverse_transform(y)
+    return model_bundle, results
 
-    # Metrics
-    mae = mean_absolute_error(y_all_inv, pred_all_inv)
-    mse = mean_squared_error(y_all_inv, pred_all_inv)
-    rmse = np.sqrt(mse)
 
-    # Final losses
-    final_train_loss = history.history["loss"][-1]
-    final_val_loss = history.history["val_loss"][-1]
+def lstm(path=SCATS_DATA_PATH, **kwargs):
+    return train_lstm(path=path, **kwargs)
 
-    print("\n========== EVALUATION ==========")
-    print(f"Final Train Loss: {final_train_loss:.6f}")
-    print(f"Final Val Loss:   {final_val_loss:.6f}")
-    print(f"MAE:              {mae:.4f}")
-    print(f"MSE:              {mse:.4f}")
-    print(f"RMSE:             {rmse:.4f}")
-    print(f"Training Time:    {training_time:.2f} seconds")
 
-    # Show first 5 predictions
-    print("\n========== SAMPLE PREDICTIONS (FIRST 5) ==========")
-    sample_pred = pred_all_inv[:5]
-    sample_actual = y_all_inv[:5]
+def save_lstm_model(model_bundle, model_path=None, metadata_path=None):
+    return save_model_bundle(
+        model_bundle,
+        model_path=model_path or DEFAULT_MODEL_PATH,
+        metadata_path=metadata_path or DEFAULT_METADATA_PATH,
+    )
 
-    for i in range(5):
-        print(
-            f"Sample {i+1}: Predicted = {sample_pred[i][0]:.2f}, "
-            f"Actual = {sample_actual[i][0]:.2f}"
-        )
 
-    # Return everything needed for later comparison
-    results = {
-        "model": "LSTM",
-        "train_loss": float(final_train_loss),
-        "val_loss": float(final_val_loss),
-        "mae": float(mae),
-        "mse": float(mse),
-        "rmse": float(rmse),
-        "training_time_sec": float(training_time),
-        "sample_predictions": sample_pred[:5].flatten().tolist(),
-        "sample_actual": sample_actual[:5].flatten().tolist()
-    }
-
-    return model, results
+def load_lstm_model(model_path=None, metadata_path=None):
+    return load_model_bundle(
+        MODEL_TYPE,
+        model_path=model_path or DEFAULT_MODEL_PATH,
+        metadata_path=metadata_path or DEFAULT_METADATA_PATH,
+    )
 
 
 if __name__ == "__main__":
-    model, results = lstm(SCATS_DATA_PATH)
+    model_bundle, results = train_lstm(SCATS_DATA_PATH)
 
     print("\n========== RESULTS DICTIONARY ==========")
     for key, value in results.items():
         print(f"{key}: {value}")
+
+    print("\nModel bundle keys:")
+    print(sorted(model_bundle.keys()))

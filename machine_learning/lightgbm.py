@@ -1,109 +1,144 @@
-from utils.parse_data import parse_scats_data, create_training_data_for_all_sites, normalize_data
-from sklearn.metrics import mean_absolute_error, mean_squared_error
-from lightgbm import LGBMRegressor
-import numpy as np
 import time
 
-SCATS_DATA_PATH = "data/scats_data_october_2006.xls"
+from lightgbm import LGBMRegressor
+import pandas as pd
+
+from machine_learning.common.config import (
+    DEFAULT_TEST_RATIO,
+    DEFAULT_VALIDATION_RATIO,
+    DEFAULT_WINDOW_SIZE,
+    SCATS_DATA_PATH,
+)
+from machine_learning.common.data_pipeline import (
+    load_and_split_data,
+    reshape_for_tabular_model,
+    reshape_targets_for_tabular_model,
+)
+from machine_learning.common.evaluation import build_results
+from machine_learning.common.persistence import (
+    build_model_bundle,
+    get_default_model_paths,
+    load_model_bundle,
+    save_model_bundle,
+)
+
+MODEL_NAME = "LightGBM"
+MODEL_TYPE = "lightgbm"
+DEFAULT_MODEL_PATH, DEFAULT_METADATA_PATH = get_default_model_paths(MODEL_TYPE)
 
 
-def lightgbm_model(path):
-    print("\n========== LIGHTGBM MODEL ==========")
-
-    # Load and prepare data
-    series = parse_scats_data(path)
-    scaled_series, scalers = normalize_data(series)
-    X, y = create_training_data_for_all_sites(scaled_series)
-
-    X = np.array(X)
-    y = np.array(y)
-
-    print(f"Original X shape: {X.shape}")
-    print(f"Original y shape: {y.shape}")
-
-    # LightGBM expects 2D input: (samples, features)
-    if len(X.shape) == 3:
-        X = X.reshape((X.shape[0], X.shape[1] * X.shape[2]))
-
-    # Flatten y to 1D for LightGBM
-    if len(y.shape) == 2:
-        y = y.ravel()
-
-    print(f"Reshaped X shape: {X.shape}")
-    print(f"Reshaped y shape: {y.shape}")
-
-    # Build model
-    model = LGBMRegressor(
+def build_lightgbm_model():
+    return LGBMRegressor(
         objective="regression",
         n_estimators=100,
         learning_rate=0.1,
         num_leaves=31,
         random_state=42,
-        n_jobs=-1
+        n_jobs=-1,
     )
 
-    print("\nModel configuration:")
-    print(model)
 
-    # Train model
+def build_feature_frame(features, window_size):
+    columns = [f"lag_{index + 1}" for index in range(window_size)]
+    return pd.DataFrame(features, columns=columns)
+
+
+def train_lightgbm(
+    path=SCATS_DATA_PATH,
+    window_size=DEFAULT_WINDOW_SIZE,
+    test_ratio=DEFAULT_TEST_RATIO,
+    validation_ratio=DEFAULT_VALIDATION_RATIO,
+    epochs=None,
+    batch_size=None,
+    save=False,
+    model_path=None,
+    metadata_path=None,
+):
+    print("\n========== LIGHTGBM MODEL ==========")
+
+    data = load_and_split_data(
+        path=path,
+        window_size=window_size,
+        test_ratio=test_ratio,
+        validation_ratio=validation_ratio,
+    )
+
+    X_train = build_feature_frame(
+        reshape_for_tabular_model(data["X_train"]),
+        window_size=window_size,
+    )
+    y_train = reshape_targets_for_tabular_model(data["y_train"])
+    X_test = build_feature_frame(
+        reshape_for_tabular_model(data["X_test"]),
+        window_size=window_size,
+    )
+    y_test = data["y_test"]
+
+    print(f"Train X shape: {X_train.shape}")
+    print(f"Test X shape:  {X_test.shape}")
+
+    model = build_lightgbm_model()
+
     start_time = time.time()
-    model.fit(X, y)
-    end_time = time.time()
-    training_time = end_time - start_time
+    model.fit(X_train, y_train)
+    training_time = time.time() - start_time
 
-    # Predict on all data for evaluation
-    pred_all = model.predict(X)
+    predictions = model.predict(X_test)
 
-    # Reshape for inverse_transform
-    pred_all = pred_all.reshape(-1, 1)
-    y = y.reshape(-1, 1)
+    results = build_results(
+        model_name=MODEL_NAME,
+        predictions=predictions,
+        actual_values=y_test,
+        test_site_ids=data["test_site_ids"],
+        scalers=data["scalers"],
+        training_time_sec=training_time,
+        train_loss=None,
+        val_loss=None,
+    )
 
-    # Keeping same scaler logic as your LSTM/GRU/RF for fair comparison
-    pred_all_inv = scalers[970].inverse_transform(pred_all)
-    y_all_inv = scalers[970].inverse_transform(y)
+    model_bundle = build_model_bundle(
+        model=model,
+        model_name=MODEL_NAME,
+        model_type=MODEL_TYPE,
+        scalers=data["scalers"],
+        window_size=window_size,
+        data_path=path,
+        test_ratio=test_ratio,
+        validation_ratio=validation_ratio,
+    )
 
-    # Metrics
-    mae = mean_absolute_error(y_all_inv, pred_all_inv)
-    mse = mean_squared_error(y_all_inv, pred_all_inv)
-    rmse = np.sqrt(mse)
+    if save:
+        model_bundle.update(save_lightgbm_model(model_bundle, model_path, metadata_path))
 
-    print("\n========== EVALUATION ==========")
-    print("Train Loss: N/A (not directly reported like LSTM/GRU)")
-    print("Val Loss:   N/A (not directly reported unless you add a validation set)")
-    print(f"MAE:              {mae:.4f}")
-    print(f"MSE:              {mse:.4f}")
-    print(f"RMSE:             {rmse:.4f}")
-    print(f"Training Time:    {training_time:.2f} seconds")
+    return model_bundle, results
 
-    # Show first 5 predictions
-    print("\n========== SAMPLE PREDICTIONS (FIRST 5) ==========")
-    sample_pred = pred_all_inv[:5]
-    sample_actual = y_all_inv[:5]
 
-    for i in range(5):
-        print(
-            f"Sample {i+1}: Predicted = {sample_pred[i][0]:.2f}, "
-            f"Actual = {sample_actual[i][0]:.2f}"
-        )
+def lightgbm_model(path=SCATS_DATA_PATH, **kwargs):
+    return train_lightgbm(path=path, **kwargs)
 
-    results = {
-        "model": "LightGBM",
-        "train_loss": None,
-        "val_loss": None,
-        "mae": float(mae),
-        "mse": float(mse),
-        "rmse": float(rmse),
-        "training_time_sec": float(training_time),
-        "sample_predictions": sample_pred[:5].flatten().tolist(),
-        "sample_actual": sample_actual[:5].flatten().tolist()
-    }
 
-    return model, results
+def save_lightgbm_model(model_bundle, model_path=None, metadata_path=None):
+    return save_model_bundle(
+        model_bundle,
+        model_path=model_path or DEFAULT_MODEL_PATH,
+        metadata_path=metadata_path or DEFAULT_METADATA_PATH,
+    )
+
+
+def load_lightgbm_model(model_path=None, metadata_path=None):
+    return load_model_bundle(
+        MODEL_TYPE,
+        model_path=model_path or DEFAULT_MODEL_PATH,
+        metadata_path=metadata_path or DEFAULT_METADATA_PATH,
+    )
 
 
 if __name__ == "__main__":
-    model, results = lightgbm_model(SCATS_DATA_PATH)
+    model_bundle, results = train_lightgbm(SCATS_DATA_PATH)
 
     print("\n========== RESULTS DICTIONARY ==========")
     for key, value in results.items():
         print(f"{key}: {value}")
+
+    print("\nModel bundle keys:")
+    print(sorted(model_bundle.keys()))

@@ -1,0 +1,8 @@
+SCATS_DATA_PATH = "data/scats_data_october_2006.xls"
+DEFAULT_WINDOW_SIZE = 4
+DEFAULT_TEST_RATIO = 0.2
+DEFAULT_VALIDATION_RATIO = 0.2
+SAVED_MODELS_DIR = "saved_models"
+SEQUENCE_MODEL_TYPES = {"lstm", "gru"}
+TABULAR_MODEL_TYPES = {"lightgbm"}
+

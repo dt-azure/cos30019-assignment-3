@@ -2,6 +2,11 @@ import argparse
 from importlib import import_module
 
 SCATS_DATA_PATH = "data/scats_data_october_2006.xls"
+DEFAULT_WINDOW_SIZE = 4
+DEFAULT_TEST_RATIO = 0.2
+DEFAULT_VALIDATION_RATIO = 0.2
+DEFAULT_EPOCHS = 5
+DEFAULT_BATCH_SIZE = 32
 
 MODEL_RUNNERS = {
     "lstm": ("LSTM", "machine_learning.lstm", "lstm"),
@@ -35,6 +40,41 @@ def parse_args():
         choices=list(MODEL_RUNNERS.keys()),
         default=list(MODEL_RUNNERS.keys()),
         help="Subset of models to run.",
+    )
+    parser.add_argument(
+        "--window-size",
+        type=int,
+        default=DEFAULT_WINDOW_SIZE,
+        help="Number of recent 15-minute values used as input features.",
+    )
+    parser.add_argument(
+        "--test-ratio",
+        type=float,
+        default=DEFAULT_TEST_RATIO,
+        help="Fraction of the latest data reserved for testing.",
+    )
+    parser.add_argument(
+        "--validation-ratio",
+        type=float,
+        default=DEFAULT_VALIDATION_RATIO,
+        help="Fraction of the training period reserved for validation.",
+    )
+    parser.add_argument(
+        "--epochs",
+        type=int,
+        default=DEFAULT_EPOCHS,
+        help="Training epochs for sequence models.",
+    )
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=DEFAULT_BATCH_SIZE,
+        help="Batch size for sequence models.",
+    )
+    parser.add_argument(
+        "--save-models",
+        action="store_true",
+        help="Save trained models and metadata into saved_models/ after training.",
     )
     return parser.parse_args()
 
@@ -84,12 +124,20 @@ def print_results_table(results):
         print(format_row(row))
 
 
-def run_model(model_key, data_path):
+def run_model(model_key, args):
     model_name, module_path, function_name = MODEL_RUNNERS[model_key]
     runner = getattr(import_module(module_path), function_name)
     print(f"\nRunning {model_name}...")
 
-    _, results = runner(data_path)
+    _, results = runner(
+        args.data_path,
+        window_size=args.window_size,
+        test_ratio=args.test_ratio,
+        validation_ratio=args.validation_ratio,
+        epochs=args.epochs,
+        batch_size=args.batch_size,
+        save=args.save_models,
+    )
     results["model"] = model_name
     return results
 
@@ -102,7 +150,7 @@ def main():
 
     for model_key in args.models:
         try:
-            results.append(run_model(model_key, args.data_path))
+            results.append(run_model(model_key, args))
         except Exception as exc:
             model_name = MODEL_RUNNERS[model_key][0]
             failures.append((model_name, exc))
