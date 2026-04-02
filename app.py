@@ -1,7 +1,5 @@
-from PyQt6.QtWidgets import QApplication, QWidget
+from gui.app import main
 
-app = QApplication([])
-window = QWidget()
-window.show()
 
-app.exec()
+if __name__ == "__main__":
+    main()
