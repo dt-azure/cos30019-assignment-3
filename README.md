@@ -38,6 +38,12 @@ Regenerate the default real topology files before routing if needed:
 ./.venv/bin/python scripts/prepare_real_topology.py
 ```
 
+Data source note:
+- ML training and prediction windows use `data/scats_data_october_2006.xls`.
+- Default routing uses `data/boroondara_locations.csv` and `data/boroondara_connectivity.csv`.
+- Those routing CSVs are generated from `data/Traffic_Count_Locations_with_LONG_LAT.csv` plus the 40 site IDs present in the traffic dataset.
+- `data/SCATSSiteListingSpreadsheet_VicRoads.xls/.xlsx` is not used directly in the active backend routing path.
+
 Single best route:
 
 ```bash

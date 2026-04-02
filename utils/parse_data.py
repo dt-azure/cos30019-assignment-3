@@ -49,6 +49,12 @@ def normalize_data(series):
     return scaled_series, scalers
 
 def parse_scats_sites(path):
+    """Load the official site listing spreadsheet.
+
+    This helper is not part of the active ML/routing backend path right now.
+    The current backend trains on `scats_data_october_2006.xls` and routes on
+    generated topology CSV files.
+    """
     df = pd.read_excel(path, sheet_name="SCATS Site Numbers", header=9, engine="openpyxl")
 
     # Clean up column names

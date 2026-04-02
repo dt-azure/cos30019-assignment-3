@@ -8,6 +8,11 @@ sample defaults while keeping the backend reproducible, this script:
    traffic dataset.
 2. Writes a normalized locations CSV that matches the graph loader schema.
 3. Builds a deterministic spatial fallback connectivity CSV from nearby sites.
+
+These default routing CSV files are not generated from
+SCATSSiteListingSpreadsheet_VicRoads.xls/.xlsx. The site listing spreadsheet is
+useful for official site labels, but it does not provide the latitude,
+longitude, or edge list needed by the current routing pipeline.
 """
 
 from __future__ import annotations
