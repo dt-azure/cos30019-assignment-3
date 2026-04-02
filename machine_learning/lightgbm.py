@@ -1,14 +1,14 @@
 from utils.parse_data import parse_scats_data, create_training_data_for_all_sites, normalize_data
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.ensemble import RandomForestRegressor
+from lightgbm import LGBMRegressor
 import numpy as np
 import time
 
 SCATS_DATA_PATH = "data/scats_data_october_2006.xls"
 
 
-def random_forest(path):
-    print("\n========== RANDOM FOREST MODEL ==========")
+def lightgbm_model(path):
+    print("\n========== LIGHTGBM MODEL ==========")
 
     # Load and prepare data
     series = parse_scats_data(path)
@@ -21,11 +21,11 @@ def random_forest(path):
     print(f"Original X shape: {X.shape}")
     print(f"Original y shape: {y.shape}")
 
-    # Random Forest expects 2D input: (samples, features)
+    # LightGBM expects 2D input: (samples, features)
     if len(X.shape) == 3:
         X = X.reshape((X.shape[0], X.shape[1] * X.shape[2]))
 
-    # Flatten y to 1D for sklearn
+    # Flatten y to 1D for LightGBM
     if len(y.shape) == 2:
         y = y.ravel()
 
@@ -33,12 +33,17 @@ def random_forest(path):
     print(f"Reshaped y shape: {y.shape}")
 
     # Build model
-    model = RandomForestRegressor(
-        n_estimators=50,
-        max_depth=None,
+    model = LGBMRegressor(
+        objective="regression",
+        n_estimators=100,
+        learning_rate=0.1,
+        num_leaves=31,
         random_state=42,
         n_jobs=-1
     )
+
+    print("\nModel configuration:")
+    print(model)
 
     # Train model
     start_time = time.time()
@@ -53,7 +58,7 @@ def random_forest(path):
     pred_all = pred_all.reshape(-1, 1)
     y = y.reshape(-1, 1)
 
-    # Keeping same scaler logic as your LSTM/GRU for fair comparison
+    # Keeping same scaler logic as your LSTM/GRU/RF for fair comparison
     pred_all_inv = scalers[970].inverse_transform(pred_all)
     y_all_inv = scalers[970].inverse_transform(y)
 
@@ -63,8 +68,8 @@ def random_forest(path):
     rmse = np.sqrt(mse)
 
     print("\n========== EVALUATION ==========")
-    print("Train Loss: N/A (not applicable for Random Forest)")
-    print("Val Loss:   N/A (not applicable for Random Forest)")
+    print("Train Loss: N/A (not directly reported like LSTM/GRU)")
+    print("Val Loss:   N/A (not directly reported unless you add a validation set)")
     print(f"MAE:              {mae:.4f}")
     print(f"MSE:              {mse:.4f}")
     print(f"RMSE:             {rmse:.4f}")
@@ -82,7 +87,7 @@ def random_forest(path):
         )
 
     results = {
-        "model": "Random Forest",
+        "model": "LightGBM",
         "train_loss": None,
         "val_loss": None,
         "mae": float(mae),
@@ -97,7 +102,7 @@ def random_forest(path):
 
 
 if __name__ == "__main__":
-    model, results = random_forest(SCATS_DATA_PATH)
+    model, results = lightgbm_model(SCATS_DATA_PATH)
 
     print("\n========== RESULTS DICTIONARY ==========")
     for key, value in results.items():
