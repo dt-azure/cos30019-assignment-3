@@ -13,8 +13,28 @@ class SearchNode:
     def expand(self, problem):
         children = []
 
-        for action in problem.actions(self.state):
+        for action in sorted(problem.actions(self.state)):
             next_state = action
+            next_cost = problem.path_cost(self.path_cost, self.state, action, next_state)
+            children.append(
+                SearchNode(
+                    state=next_state,
+                    parent=self,
+                    action=action,
+                    path_cost=next_cost,
+                )
+            )
+
+        return children
+
+    def expand_simple(self, problem):
+        children = []
+
+        for action in sorted(problem.actions(self.state)):
+            next_state = action
+            if self.contains_state(next_state):
+                continue
+
             next_cost = problem.path_cost(self.path_cost, self.state, action, next_state)
             children.append(
                 SearchNode(
@@ -40,6 +60,15 @@ class SearchNode:
     def solution(self):
         return [node.state for node in self.path()]
 
+    def contains_state(self, state):
+        node = self
+        while node is not None:
+            if node.state == state:
+                return True
+            node = node.parent
+
+        return False
+
 
 def astar_search(problem):
     return best_first_graph_search(
@@ -53,6 +82,37 @@ def uniform_cost_search(problem):
         problem,
         priority_function=lambda node: node.path_cost,
     )
+
+
+def uniform_cost_top_k_search(problem, top_k=5):
+    if top_k < 1:
+        raise ValueError("top_k must be at least 1.")
+
+    start_node = SearchNode(state=problem.initial)
+    frontier = []
+    tie_breaker = count()
+    solutions = []
+    seen_paths = set()
+
+    heappush(frontier, (0.0, next(tie_breaker), start_node))
+
+    while frontier and len(solutions) < top_k:
+        _, _, node = heappop(frontier)
+
+        if problem.goal_test(node.state):
+            path_signature = tuple(node.solution())
+            if path_signature not in seen_paths:
+                seen_paths.add(path_signature)
+                solutions.append(node)
+            continue
+
+        for child in node.expand_simple(problem):
+            heappush(
+                frontier,
+                (child.path_cost, next(tie_breaker), child),
+            )
+
+    return solutions
 
 
 def best_first_graph_search(problem, priority_function):
@@ -95,4 +155,3 @@ def best_first_graph_search(problem, priority_function):
 
 def extract_path_states(goal_node):
     return goal_node.solution()
-
