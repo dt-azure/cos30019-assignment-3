@@ -1,6 +1,6 @@
 :root {
   font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
-  color: #10202c;
+  color: $color-primary;
   background:
     radial-gradient(circle at top left, rgba(101, 167, 191, 0.18), transparent 32%),
     radial-gradient(circle at bottom right, rgba(247, 178, 103, 0.2), transparent 28%),
@@ -30,13 +30,17 @@ select {
 
 .app-shell {
   min-height: 100vh;
-  padding: 32px 20px 48px;
 }
 
-.page {
+.container {
+  margin: 0 auto;
+  max-width: 95%;
+}
+
+/* .page {
   max-width: 1200px;
   margin: 0 auto;
-}
+} */
 
 .hero {
   margin-bottom: 28px;
@@ -66,21 +70,21 @@ select {
 
 .dashboard-grid {
   display: grid;
-  gap: 20px;
+  // gap: 20px;
   grid-template-columns: minmax(320px, 410px) minmax(0, 1fr);
 }
 
 .left-column {
   display: grid;
-  gap: 20px;
+  border-right: 1px solid $color-grey-border;
 }
 
 .card {
   padding: 22px;
-  border: 1px solid rgba(16, 32, 44, 0.08);
-  border-radius: 22px;
+  // border: 1px solid $color-grey-border;
+  // border-radius: 22px;
   background: rgba(255, 255, 255, 0.86);
-  box-shadow: 0 18px 40px rgba(16, 32, 44, 0.08);
+  // box-shadow: 0 18px 40px rgba(16, 32, 44, 0.08);
   backdrop-filter: blur(10px);
 }
 
@@ -90,7 +94,7 @@ select {
 
 .section-header h2 {
   margin: 0;
-  font-size: 1.35rem;
+  font-size: 1.5rem;
 }
 
 .form-grid {

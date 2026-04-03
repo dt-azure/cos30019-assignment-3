@@ -10,8 +10,7 @@ export function RouteResults({ loading, error, routeResponse }: RouteResultsProp
   return (
     <section className="card results-card">
       <div className="section-header">
-        <p className="eyebrow">Results</p>
-        <h2>Dynamic routing output</h2>
+        <h2>Results</h2>
       </div>
 
       {loading ? (

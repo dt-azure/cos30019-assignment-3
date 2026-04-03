@@ -5,6 +5,9 @@ import { RouteForm } from "./components/RouteForm";
 import { RouteResults } from "./components/RouteResults";
 import { computeRoutes, fetchAppConfig } from "./lib/api";
 import type { AppConfig, RouteResponse, SiteOption } from "./types";
+import MapPage from "./components/MapPage";
+
+import Header from "./components/Header";
 
 function getSiteDescription(sites: SiteOption[], rawValue: string): string | null {
   if (!rawValue.trim()) {
@@ -107,18 +110,20 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <main className="page">
-        <section className="hero">
-          <p className="eyebrow">COS30019 Assignment 2B</p>
-          <h1>Traffic-Based Route Guidance System</h1>
-          <p className="hero-copy">
-            This web client reuses the existing Python routing pipeline. It predicts
-            current traffic flow, updates dynamic edge costs, and returns the best route
-            or top-k route alternatives between SCATS sites.
-          </p>
-        </section>
+        <div className="container">
+          {/* <section className="hero">
+            <p className="eyebrow">COS30019 Assignment 2B</p>
+            <h1>Traffic-Based Route Guidance System</h1>
+            <p className="hero-copy">
+              This web client reuses the existing Python routing pipeline. It predicts
+              current traffic flow, updates dynamic edge costs, and returns the best route
+              or top-k route alternatives between SCATS sites.
+            </p>
+          </section> */}
 
-        {configError ? (
+          <Header></Header>
+
+          {/* {configError ? (
           <section className="card">
             <div className="section-header">
               <p className="eyebrow">Connection Error</p>
@@ -126,35 +131,42 @@ export default function App() {
             </div>
             <p className="status-banner status-error">{configError}</p>
           </section>
-          ) : null}
+          ) : null} */}
 
-        <div className="dashboard-grid">
-          <div className="left-column">
-            <RouteForm
-              config={config}
-              origin={origin}
-              destination={destination}
-              model={model}
-              topK={topK}
-              loading={loadingRoutes || loadingConfig}
-              originDescription={originDescription}
-              destinationDescription={destinationDescription}
-              onOriginChange={setOrigin}
-                     onDestinationChange={setDestination}
-              onModelChange={setModel}
-              onTopKChange={setTopK}
-              onSubmit={handleSubmit}
-            />
-            <DataSourcesPanel config={config} />
+          <div className="dashboard-grid">
+            <div className="left-column">
+              <RouteForm
+                config={config}
+                origin={origin}
+                destination={destination}
+                model={model}
+                topK={topK}
+                loading={loadingRoutes || loadingConfig}
+                originDescription={originDescription}
+                destinationDescription={destinationDescription}
+                onOriginChange={setOrigin}
+                      onDestinationChange={setDestination}
+                onModelChange={setModel}
+                onTopKChange={setTopK}
+                onSubmit={handleSubmit}
+              />
+
+              <DataSourcesPanel config={config} />
+                </div>
+
+                <div className="right-column">
+                  <RouteResults
+                  loading={loadingRoutes || loadingConfig}
+                  error={routeError}
+                  routeResponse={routeResponse}
+                />
+
+                <div className="card map-container">
+                  <MapPage/>
+                </div>
+            </div>
           </div>
-
-          <RouteResults
-            loading={loadingRoutes || loadingConfig}
-            error={routeError}
-            routeResponse={routeResponse}
-          />
-        </div>
-      </main>
+        </div> 
     </div>
   );
 }
