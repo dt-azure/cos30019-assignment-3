@@ -114,7 +114,7 @@ export function RouteMap({ sites, routes, origin, destination }: RouteMapProps) 
       }
 
       if (latlngs.length >= 2) {
-        L.polyline(latlngs, {
+        L.Routing.control(latlngs, {
           color,
           weight: 4,
           opacity: 0.8,
@@ -135,6 +135,7 @@ export function RouteMap({ sites, routes, origin, destination }: RouteMapProps) 
       map.remove();
     };
   }, [sites, routes, origin, destination, mapReady]);
+
 
   return (
     <div>

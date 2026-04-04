@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+import osmnx as ox
 
 from machine_learning.common.cli_route_service import (
     DEFAULT_CLI_ALGORITHM,
@@ -129,8 +130,8 @@ def _load_site_options(locations_csv: str = DEFAULT_LOCATIONS_CSV) -> list[SiteO
             SiteOption(
                 site_id=int(row["NB_SCATS_SITE"]),
                 description=row.get("SITE_DESC") or None,
-                latitude=float(row["LATITUDE"]) if row.get("LATITUDE") else None,
-                longitude=float(row["LONGITUDE"]) if row.get("LONGITUDE") else None,
+                latitude=float(row["SNAPPED_LATITUDE"]) if row.get("SNAPPED_LATITUDE") else None,
+                longitude=float(row["SNAPPED_LONGITUDE"]) if row.get("SNAPPED_LONGITUDE") else None,
             )
             for row in sorted(
                 reader,

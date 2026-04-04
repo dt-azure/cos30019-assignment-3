@@ -84,7 +84,22 @@ export function MapPredictionPage() {
     layersRef.current = [];
   }, []);
 
-  const drawRoutesOnMap = useCallback((response: RouteResponse, selectedIdx: number) => {
+  const fetchRoadPath = async (latlngs: [number, number][]) => {
+    const osrmCoords = latlngs.map(ll => `${ll[1]},${ll[0]}`).join(";");
+    const url = `https://router.project-osrm.org/route/v1/driving/${osrmCoords}?overview=full&geometries=geojson`;
+    
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      // GeoJSON returns [lng, lat], Leaflet needs [lat, lng]
+      return data.routes[0].geometry.coordinates.map((c: any) => [c[1], c[0]]);
+    } catch (err) {
+      console.error("OSRM Routing failed, falling back to straight lines", err);
+      return latlngs; // Fallback to straight lines if API fails
+    }
+  };
+
+  const drawRoutesOnMap = useCallback(async (response: RouteResponse, selectedIdx: number) => {
     if (!mapRef.current) return;
     clearMapLayers();
 
@@ -95,44 +110,33 @@ export function MapPredictionPage() {
 
     const allBounds: L.LatLngExpression[] = [];
 
-    response.routes.forEach((route, idx) => {
+
+    for (let idx = 0; idx < response.routes.length; idx++) {
+      const route = response.routes[idx];
       const isSelected = idx === selectedIdx;
       const color = ROUTE_COLORS[idx % ROUTE_COLORS.length];
-      const latlngs: L.LatLngExpression[] = [];
-
+      
+      const siteCoords: [number, number][] = [];
       for (const siteId of route.path) {
         const site = siteMap.get(siteId);
-        if (site && site.latitude != null && site.longitude != null) {
-          const latlng: L.LatLngExpression = [site.latitude, site.longitude];
-          latlngs.push(latlng);
-          allBounds.push(latlng);
+        if (site?.latitude != null && site?.longitude != null) {
+          siteCoords.push([site.latitude, site.longitude]);
+          allBounds.push([site.latitude, site.longitude]);
         }
       }
 
-      if (latlngs.length >= 2) {
-        const polyline = L.polyline(latlngs, {
+      if (siteCoords.length >= 2) {
+        const roadCoords = await fetchRoadPath(siteCoords);
+
+        const polyline = L.polyline(roadCoords, {
           color,
           weight: isSelected ? 6 : 3,
           opacity: isSelected ? 1 : 0.5,
           dashArray: isSelected ? undefined : "8 6",
-        }).bindTooltip(
-          `<b>Route ${idx + 1}</b><br>${route.total_travel_time_min.toFixed(1)} min`,
-          { sticky: true }
-        );
-
-        polyline.addTo(mapRef.current!);
+        }).addTo(mapRef.current!);
+        
         layersRef.current.push(polyline);
-
-        if (isSelected) {
-          const glowLine = L.polyline(latlngs, {
-            color,
-            weight: 12,
-            opacity: 0.2,
-          });
-          glowLine.addTo(mapRef.current!);
-          layersRef.current.push(glowLine);
-        }
-
+        
         const originSite = siteMap.get(route.path[0]);
         if (originSite && originSite.latitude != null && originSite.longitude != null) {
           const originMarker = L.marker([originSite.latitude, originSite.longitude], {
@@ -161,7 +165,7 @@ export function MapPredictionPage() {
           layersRef.current.push(destMarker);
         }
       }
-    });
+    }
 
     if (allBounds.length > 0) {
       mapRef.current.fitBounds(allBounds, { padding: [50, 50] });
