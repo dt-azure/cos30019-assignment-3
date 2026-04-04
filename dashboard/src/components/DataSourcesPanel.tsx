@@ -19,9 +19,8 @@ export function DataSourcesPanel({ config }: DataSourcesPanelProps) {
       </section>
     );
   }
-
   return (
-    <section className="card">
+    <section className="card data-source">
       <div className="section-header">
         <p className="eyebrow">Backend Status</p>
         <h2>Current data sources</h2>
@@ -51,4 +50,3 @@ export function DataSourcesPanel({ config }: DataSourcesPanelProps) {
     </section>
   );
 }
-
