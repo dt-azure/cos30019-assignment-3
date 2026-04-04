@@ -5,7 +5,9 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+import osmnx as ox
 
 from machine_learning.common.cli_route_service import (
     DEFAULT_CLI_ALGORITHM,
@@ -27,11 +29,14 @@ from machine_learning.common.topology_service import (
 API_PREFIX = "/api"
 MAX_TOP_K = 5
 SUPPORTED_MODELS = sorted(SEQUENCE_MODEL_TYPES | TABULAR_MODEL_TYPES)
+FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
 
 
 class SiteOption(BaseModel):
     site_id: int
     description: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
 
 
 class DataSourcesResponse(BaseModel):
@@ -73,6 +78,7 @@ class RouteResponse(BaseModel):
     routes_found: int
     routes: list[RouteResultResponse]
     data_sources: DataSourcesResponse
+    sites: list[SiteOption]
 
 
 app = FastAPI(
@@ -88,11 +94,16 @@ app.add_middleware(
         "http://127.0.0.1:5173",
         "http://localhost:4173",
         "http://127.0.0.1:4173",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+if FRONTEND_DIST.is_dir():
+    app.mount("/", StaticFiles(directory=str(FRONTEND_DIST), html=True), name="frontend")
 
 
 def _get_data_sources() -> DataSourcesResponse:
@@ -119,6 +130,8 @@ def _load_site_options(locations_csv: str = DEFAULT_LOCATIONS_CSV) -> list[SiteO
             SiteOption(
                 site_id=int(row["NB_SCATS_SITE"]),
                 description=row.get("SITE_DESC") or None,
+                latitude=float(row["SNAPPED_LATITUDE"]) if row.get("SNAPPED_LATITUDE") else None,
+                longitude=float(row["SNAPPED_LONGITUDE"]) if row.get("SNAPPED_LONGITUDE") else None,
             )
             for row in sorted(
                 reader,
@@ -140,6 +153,7 @@ def _build_route_response(
     destination: int,
     model: str,
     routes_requested: int,
+    sites: list[SiteOption] | None = None,
 ) -> RouteResponse:
     site_lookup = _load_site_lookup()
     data_sources = _get_data_sources()
@@ -167,6 +181,7 @@ def _build_route_response(
         routes_found=len(routes),
         routes=routes,
         data_sources=data_sources,
+        sites=sites or [],
     )
 
 
@@ -230,5 +245,6 @@ def compute_routes(request: RouteRequest) -> RouteResponse:
         destination=request.destination,
         model=request.model,
         routes_requested=request.top_k,
+        sites=_load_site_options(),
     )
     return response

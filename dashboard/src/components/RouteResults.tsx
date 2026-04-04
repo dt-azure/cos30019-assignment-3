@@ -64,7 +64,7 @@ export function RouteResults({ loading, error, routeResponse }: RouteResultsProp
                   <h3>Route {index + 1}</h3>
                   <span className="route-badge">{route.algorithm}</span>
                 </div>
-                <p className="route-path">{route.path.join(" → ")}</p>
+                <p className="route-path">{route.path.join(" -> ")}</p>
                 <dl className="route-metrics">
                   <div>
                     <dt>Goal site</dt>
