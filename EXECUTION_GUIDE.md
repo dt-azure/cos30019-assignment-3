@@ -1,223 +1,143 @@
 # Execution Guide — COS30019 Assignment 2B
 
-This guide covers all ways to run the Traffic-Based Route Guidance System.
+This guide is written for beginners. Follow the steps one by one.
 
 ---
 
-## Installation
+## Step 1: Install Required Software
 
-### Step 1: Install Node.js
+You need 2 things on your computer:
 
-If you don't have Node.js installed:
+### 1. Python (already included in the project)
+The project comes with a Python environment in the `.venv` folder. You don't need to install anything else for Python.
 
-1. Go to https://nodejs.org
-2. Download and install the **LTS version** (includes npm)
-3. Verify installation:
+### 2. Node.js (for the Web interface)
+Open **PowerShell** and run this command to install automatically (no browser needed):
 
+```powershell
+winget install OpenJS.NodeJS.LTS
+```
+
+After installation, **close PowerShell and reopen it** so the system recognizes the new commands.
+
+Verify the installation:
 ```powershell
 node --version
 npm --version
 ```
+If you see version numbers (e.g., `v20.x.x` and `10.x.x`), you're good to go.
 
-### Step 2: Install Frontend Dependencies
+> **If `winget` doesn't work:** Download Node.js from https://nodejs.org (green LTS button), install it, then restart your computer.
 
-Open a terminal in the project root and run:
+---
+
+## Step 2: Get the Project
+
+1. Download the project `.zip` file from GitHub (or clone it if you have Git).
+2. Extract it to a folder, for example: `C:\Users\YourName\cos30019-assignment-3`
+3. Open **PowerShell** and navigate to the extracted folder:
+   ```powershell
+   cd C:\Users\YourName\cos30019-assignment-3
+   ```
+   *(Replace `YourName` with your actual Windows username)*
+
+---
+
+## Step 3: Install Frontend Dependencies
+
+Run this command **only once** when you first get the project:
 
 ```powershell
 cd frontend
 npm install
 ```
 
-This installs: React, TypeScript, Vite, Leaflet, Recharts, React Router, Lucide Icons.
-
-### Step 3: Install Python Dependencies (if needed)
-
-The project uses the existing `.venv` virtual environment. If packages are missing:
-
-```powershell
-.\.venv\Scripts\python.exe -m pip install fastapi uvicorn joblib lightgbm numpy pandas scikit-learn tensorflow
-```
-
-### Step 4: Train and Save Models
-
-Before running the web app, you must train and save the ML models:
-
-```powershell
-.\.venv\Scripts\python.exe compare_models.py --save-models
-```
-
-This creates the `saved_models/` directory with trained LSTM, GRU, and LightGBM models.
+You'll see text scrolling as packages are downloaded. Wait until your cursor appears again.
 
 ---
 
-## Part 1: Run from Command Line (CLI)
+## Step 4: Run the Application
 
-### Single Route
+The app has 2 parts that must run at the same time: **Backend** (AI processing) and **Frontend** (Web interface). You need to open **2 PowerShell windows**.
+
+### Window 1 — Start the Backend
+1. Open a new PowerShell window.
+2. Navigate to the project folder:
+   ```powershell
+   cd C:\Users\YourName\cos30019-assignment-3
+   ```
+3. Run the backend server:
+   ```powershell
+   .\.venv\Scripts\python.exe -m uvicorn webapi.server:app --reload --host 127.0.0.1 --port 8000
+   ```
+4. You should see: `Uvicorn running on http://127.0.0.1:8000`
+5. **Leave this window open. Do not close it.**
+
+### Window 2 — Start the Frontend
+1. Open another new PowerShell window (keep Window 1 running).
+2. Navigate to the frontend folder:
+   ```powershell
+   cd C:\Users\YourName\cos30019-assignment-3\frontend
+   ```
+3. Run the frontend dev server:
+   ```powershell
+   npm run dev
+   ```
+4. You should see: `Local: http://localhost:5173/`
+5. **Leave this window open too.**
+
+---
+
+## Step 5: Open the Browser
+
+1. Open your web browser (Chrome, Edge, Firefox).
+2. Type: **http://127.0.0.1:5173**
+3. Press Enter. You should see the home page of the Traffic Route Guidance System.
+
+---
+
+## How to Use the Web Application
+
+### Map Prediction (Main Feature)
+1. Go to the **Map Prediction** page (or click "Start Route Planning" on the home page).
+2. Select **Origin** from the dropdown (e.g., `2000`).
+3. Select **Destination** from the dropdown (e.g., `3002`).
+4. Choose a **Model** (`lightgbm` is recommended for speed).
+5. Choose **Top-K** (how many route options you want, 1 to 5).
+6. Click **Find Routes**.
+7. Routes will appear in the sidebar with travel times. Click any route to highlight it on the map and see turn-by-turn directions.
+
+### Visualization
+Go to the **Visualization** page to see charts comparing the accuracy, speed, and error rates of the 3 AI models.
+
+---
+
+## Run from Command Line (No Browser)
+
+If you just want a quick route result in the terminal:
 
 ```powershell
+cd C:\Users\YourName\cos30019-assignment-3
 .\.venv\Scripts\python.exe main.py --origin 2000 --destination 3002 --model lightgbm
 ```
 
-### Top-K Routes (up to 5)
+---
 
-```powershell
-.\.venv\Scripts\python.exe main.py --origin 2000 --destination 3002 --model lightgbm --top-k 5
-```
+## Common Problems and Fixes
 
-### Available Parameters
-
-| Parameter | Description | Default | Options |
-|-----------|-------------|---------|---------|
-| `--origin` | Origin SCATS site ID | 2000 | Any valid site ID |
-| `--destination` | Destination SCATS site ID | 3002 | Any valid site ID |
-| `--model` | Prediction model | lightgbm | `lightgbm`, `lstm`, `gru` |
-| `--top-k` | Number of routes (1-5) | 1 | 1, 2, 3, 4, 5 |
-| `--algorithm` | Search algorithm | astar | `astar`, `ucs` |
-
-### Available SCATS Sites
-
-`2000, 2200, 2820, 2825, 3001, 3002, 3120, 3122, 3126, 3127, 3180, 3682, 3685, 3812, 4030, 4032, 4035, 4040, 4051, 4057, 4063, 4324`
+| Problem | How to Fix |
+|---------|-----------|
+| `npm` is not recognized | Install Node.js (Step 1), then close and reopen PowerShell |
+| `ModuleNotFoundError` | Make sure you're running commands from the project root folder |
+| Web page is blank/white | Make sure the Backend (Window 1) is still running |
+| "No route found" | Only select locations from the dropdown list |
+| Port 8000 already in use | Close other programs using port 8000, or restart your computer |
 
 ---
 
-## Part 2: Run the Web Application
+## How to Stop the Application
 
-The web app requires **2 terminals** running simultaneously.
-
-### Terminal 1 — Start Backend API
-
-```powershell
-.\.venv\Scripts\python.exe -m uvicorn webapi.server:app --reload --host 127.0.0.1 --port 8000
-```
-
-You should see:
-```
-INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-```
-
-### Terminal 2 — Start Frontend
-
-Open a **new terminal** (keep Terminal 1 running):
-
-```powershell
-cd C:\Users\vieth\cos30019\cos30019-assignment-3\frontend
-npm run dev
-```
-
-You should see:
-```
-  VITE v6.0.3  ready in xxx ms
-
-  ➜  Local:   http://localhost:5173/
-```
-
-### Open Browser
-
-Go to `http://127.0.0.1:5173`
-
----
-
-## Part 3: Using the Web Application
-
-### Home Page (`/`)
-- System overview and key statistics
-- Quick navigation buttons to Map Prediction and Visualization
-
-### Map Prediction Page (`/map`)
-
-**How to find a route:**
-
-1. Select **Origin** from dropdown (e.g., `2000`)
-2. Select **Destination** from dropdown (e.g., `3002`)
-3. Choose **Model** (LightGBM recommended for speed)
-4. Choose **Top-K** (1-5 routes)
-5. Click **Find Routes**
-
-**After routes are computed:**
-
-- Routes appear in the sidebar with travel times
-- Click any route to highlight it on the map
-- See turn-by-turn directions with traffic level, speed, distance, and ETA
-
-### Visualization Page (`/visualization`)
-
-**Tabs:**
-
-1. **Performance Metrics** — Bar charts for MAE, RMSE, training time, efficiency
-2. **Radar Comparison** — Multi-dimensional model comparison
-3. **Insights** — Key findings from model evaluation
-
-**Charts include:**
-- MAE & RMSE comparison
-- Training time comparison
-- Model efficiency score
-- Traffic flow prediction vs actual (24h)
-- Error distribution
-- Model performance share (pie chart)
-
-### About Page (`/about`)
-- Project overview and technology stack
-- How the system works (5 steps)
-- Resources and references
-
----
-
-## Part 4: API Testing
-
-### Health Check
-
-```powershell
-curl http://127.0.0.1:8000/api/health
-```
-
-### Get Configuration
-
-```powershell
-curl http://127.0.0.1:8000/api/config
-```
-
-### Compute Routes
-
-```powershell
-curl -X POST http://127.0.0.1:8000/api/routes/compute `
-  -H "Content-Type: application/json" `
-  -d '{"origin": 2000, "destination": 3002, "model": "lightgbm", "top_k": 3}'
-```
-
----
-
-## Part 5: Smoke Tests
-
-```powershell
-.\.venv\Scripts\python.exe -m scripts.backend_smoke_test
-```
-
-Expected: 11 tests all PASS.
-
----
-
-## Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| `npm` not found | Install Node.js from https://nodejs.org |
-| `ModuleNotFoundError: No module named 'joblib'` | `.\.venv\Scripts\python.exe -m pip install joblib` |
-| `ModuleNotFoundError: No module named 'tensorflow'` | `.\.venv\Scripts\python.exe -m pip install tensorflow` |
-| Frontend shows blank page | Check that backend is running on port 8000 |
-| "No route found" error | Ensure origin and destination are in the valid sites list |
-| Port 8000 already in use | Kill existing process or use `--port 8001` |
-| Port 5173 already in use | Vite will auto-select another port (e.g., 5174) |
-| `npm install` fails | Run `npm install --legacy-peer-deps` |
-
----
-
-## Quick Reference
-
-| Task | Command |
-|------|---------|
-| Install frontend deps | `cd frontend && npm install` |
-| Train models | `.\.venv\Scripts\python.exe compare_models.py --save-models` |
-| Start backend | `.\.venv\Scripts\python.exe -m uvicorn webapi.server:app --reload --host 127.0.0.1 --port 8000` |
-| Start frontend | `cd frontend && npm run dev` |
-| CLI route | `.\.venv\Scripts\python.exe main.py --origin 2000 --destination 3002 --model lightgbm` |
-| Smoke tests | `.\.venv\Scripts\python.exe -m scripts.backend_smoke_test` |
+When you're done:
+1. Go to each PowerShell window.
+2. Press **Ctrl + C** to stop the program.
+3. Close the windows.

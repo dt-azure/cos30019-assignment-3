@@ -1,100 +1,45 @@
 # COS30019 Assignment 2B — Traffic-Based Route Guidance System
 
-> A web application that uses AI to predict traffic and find the fastest routes in the Boroondara area.
+> An AI-powered web application that predicts traffic flow and finds the fastest routes in the Boroondara area.
+
+This is the Assignment 2B submission for the course **COS30019 - Introduction to AI**.
 
 ---
 
-## What This Project Does
+## Project Structure (Folder Tree)
 
-This system uses 3 AI models (LSTM, GRU, LightGBM) to:
-1. **Predict traffic** at intersections
-2. **Calculate travel time** for every road
-3. **Find the fastest routes** from point A to B
-4. **Show everything on an interactive map**
-
----
-
-## Quick Start — 1 Command to Run Everything
-
-### First Time Setup (do this once)
-
-Open **PowerShell** and run these 3 commands:
-
-**1. Install Node.js (via PowerShell, no browser needed):**
-```powershell
-winget install OpenJS.NodeJS.LTS
-```
-Then **close and reopen PowerShell**.
-
-**2. Install frontend dependencies:**
-```powershell
-cd C:\Users\vieth\cos30019\cos30019-assignment-3\frontend
-npm install
-```
-
-**3. Train the AI models:**
-```powershell
-cd C:\Users\vieth\cos30019\cos30019-assignment-3
-.\.venv\Scripts\python.exe compare_models.py --save-models
-```
-
-Wait 2-3 minutes. Done.
-
-### Run the Web App (every time after setup)
-
-Just **1 command** in PowerShell:
-
-```powershell
-cd C:\Users\vieth\cos30019\cos30019-assignment-3
-.\.venv\Scripts\python.exe -m uvicorn webapi.server:app --reload --host 127.0.0.1 --port 8000
-```
-
-Then open: **http://127.0.0.1:8000**
-
-That's it. One terminal. One command.
-
----
-
-## Using the Web App
-
-### Map Prediction (main page)
-1. Select **Origin** (e.g., `2000`)
-2. Select **Destination** (e.g., `3002`)
-3. Choose **Model** (`lightgbm` is fastest)
-4. Click **Find Routes**
-5. Click any route on the sidebar to see it on the map
-
-### Visualization
-Charts comparing AI model accuracy, speed, and error rates.
-
----
-
-## Run from Command Line (No Browser)
-
-```powershell
-.\.venv\Scripts\python.exe main.py --origin 2000 --destination 3002 --model lightgbm
+```text
+cos30019-assignment-3/
+│
+├── .venv/                      # Python Virtual Environment (Backend)
+├── data/                       # Input Data
+│   ├── scats_data_october_2006.xls  # Historical traffic data
+│   ├── boroondara_locations.csv     # SCATS site locations
+│   └── boroondara_connectivity.csv  # Road network connectivity
+│
+├── frontend/                   # Web Interface (React + Vite)
+│   ├── src/                    # Source code
+│   ├── package.json            # Node.js configuration
+│   └── node_modules/           # Installed libraries
+│
+├── machine_learning/           # AI/ML Source Code
+│   ├── lstm.py                 # LSTM Model
+│   ├── gru.py                  # GRU Model
+│   ├── lightgbm.py             # LightGBM Model
+│   └── common/                 # Shared ML utilities
+│
+├── utils/                      # Utility functions (Calculations, Search)
+├── webapi/                     # Backend Server (FastAPI)
+│   └── server.py               # API entry point
+│
+├── main.py                     # CLI entry point for routing
+└── compare_models.py           # Script to train and compare models
 ```
 
 ---
 
-## Available Locations
+## Key Features
 
-`2000, 2200, 2820, 2825, 3001, 3002, 3120, 3122, 3126, 3127, 3180, 3682, 3685, 3812, 4030, 4032, 4035, 4040, 4051, 4057, 4063, 4324`
-
----
-
-## Troubleshooting
-
-| Problem | Fix |
-|---------|-----|
-| `winget` not found | Open Microsoft Store, search "App Installer", install it |
-| `npm` not found after install | Close and reopen PowerShell |
-| `ModuleNotFoundError` | `.\.venv\Scripts\python.exe -m pip install joblib tensorflow` |
-| Web page is blank | Make sure the command above is still running |
-| "No route found" | Use only the 22 locations listed above |
-
----
-
-## How to Stop
-
-Press **Ctrl + C** in the PowerShell window.
+1.  **Traffic Prediction:** Uses 3 AI models (LSTM, GRU, LightGBM) to forecast traffic flow.
+2.  **Optimal Routing:** Finds fastest routes using A* and Uniform Cost Search algorithms.
+3.  **Interactive Web UI:** Map visualization, route comparison, and model performance charts.
