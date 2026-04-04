@@ -32,6 +32,8 @@ SUPPORTED_MODELS = sorted(SEQUENCE_MODEL_TYPES | TABULAR_MODEL_TYPES)
 class SiteOption(BaseModel):
     site_id: int
     description: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
 
 
 class DataSourcesResponse(BaseModel):
@@ -73,6 +75,7 @@ class RouteResponse(BaseModel):
     routes_found: int
     routes: list[RouteResultResponse]
     data_sources: DataSourcesResponse
+    sites: list[SiteOption]
 
 
 app = FastAPI(
@@ -119,6 +122,8 @@ def _load_site_options(locations_csv: str = DEFAULT_LOCATIONS_CSV) -> list[SiteO
             SiteOption(
                 site_id=int(row["NB_SCATS_SITE"]),
                 description=row.get("SITE_DESC") or None,
+                latitude=float(row["LATITUDE"]) if row.get("LATITUDE") else None,
+                longitude=float(row["LONGITUDE"]) if row.get("LONGITUDE") else None,
             )
             for row in sorted(
                 reader,
@@ -140,6 +145,7 @@ def _build_route_response(
     destination: int,
     model: str,
     routes_requested: int,
+    sites: list[SiteOption] | None = None,
 ) -> RouteResponse:
     site_lookup = _load_site_lookup()
     data_sources = _get_data_sources()
@@ -167,6 +173,7 @@ def _build_route_response(
         routes_found=len(routes),
         routes=routes,
         data_sources=data_sources,
+        sites=sites or [],
     )
 
 
@@ -230,5 +237,6 @@ def compute_routes(request: RouteRequest) -> RouteResponse:
         destination=request.destination,
         model=request.model,
         routes_requested=request.top_k,
+        sites=_load_site_options(),
     )
     return response

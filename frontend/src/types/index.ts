@@ -1,6 +1,8 @@
 export type SiteOption = {
   site_id: number;
   description: string | null;
+  latitude: number | null;
+  longitude: number | null;
 };
 
 export type DataSources = {
@@ -47,5 +49,5 @@ export type RouteResponse = {
   routes_found: number;
   routes: RouteResult[];
   data_sources: DataSources;
+  sites: SiteOption[];
 };
-

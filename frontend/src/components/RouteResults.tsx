@@ -1,4 +1,5 @@
 import type { RouteResponse } from "../types";
+import { RouteMap } from "./RouteMap";
 
 type RouteResultsProps = {
   loading: boolean;
@@ -38,7 +39,7 @@ export function RouteResults({ loading, error, routeResponse }: RouteResultsProp
               <dd>
                 {routeResponse.origin}
                 {routeResponse.origin_description
-                  ? ` · ${routeResponse.origin_description}`
+                  ? ` - ${routeResponse.origin_description}`
                   : ""}
               </dd>
             </div>
@@ -47,7 +48,7 @@ export function RouteResults({ loading, error, routeResponse }: RouteResultsProp
               <dd>
                 {routeResponse.destination}
                 {routeResponse.destination_description
-                  ? ` · ${routeResponse.destination_description}`
+                  ? ` - ${routeResponse.destination_description}`
                   : ""}
               </dd>
             </div>
@@ -59,6 +60,13 @@ export function RouteResults({ loading, error, routeResponse }: RouteResultsProp
             </div>
           </div>
 
+          <RouteMap
+            sites={routeResponse.sites}
+            routes={routeResponse.routes}
+            origin={routeResponse.origin}
+            destination={routeResponse.destination}
+          />
+
           <div className="routes-list">
             {routeResponse.routes.map((route, index) => (
               <article key={`${route.path.join("-")}-${index}`} className="route-card">
@@ -66,7 +74,7 @@ export function RouteResults({ loading, error, routeResponse }: RouteResultsProp
                   <h3>Route {index + 1}</h3>
                   <span className="route-badge">{route.algorithm}</span>
                 </div>
-                <p className="route-path">{route.path.join(" → ")}</p>
+                <p className="route-path">{route.path.join(" -> ")}</p>
                 <dl className="route-metrics">
                   <div>
                     <dt>Goal site</dt>
@@ -89,4 +97,3 @@ export function RouteResults({ loading, error, routeResponse }: RouteResultsProp
     </section>
   );
 }
-
