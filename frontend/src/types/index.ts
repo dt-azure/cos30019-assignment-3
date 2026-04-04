@@ -24,7 +24,6 @@ export type AppConfig = {
   sites: SiteOption[];
 };
 
-
 export type RouteRequest = {
   origin: number;
   destination: number;
@@ -40,7 +39,6 @@ export type RouteResult = {
   algorithm: string;
 };
 
-
 export type RouteResponse = {
   model: string;
   origin: number;
@@ -52,15 +50,4 @@ export type RouteResponse = {
   routes: RouteResult[];
   data_sources: DataSources;
   sites: SiteOption[];
-};
-
-export type Route = {
-  path: number[];
-};
-
-export type Site = {
-  site_id: number;
-  lat: number;
-  lng: number;
-  description: string;
 };
