@@ -14,7 +14,7 @@ This repo keeps everything in one place:
 machine_learning/   Core ML pipeline, prediction, graph, problem, and route services
 utils/              Shared parsing, graph, search, and utility helpers
 webapi/             Thin FastAPI wrapper over the backend
-frontend/           React + Vite web UI
+dashboard/           React + Vite web UI
 scripts/            Topology generation and backend smoke tests
 data/               Traffic data and topology CSV inputs
 main.py             CLI route entry point
@@ -53,7 +53,7 @@ Install the web API dependencies if they are not already installed:
 Install the React frontend dependencies:
 
 ```bash
-cd frontend
+cd dashboard
 npm install
 ```
 
