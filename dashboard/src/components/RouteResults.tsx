@@ -1,5 +1,5 @@
 import type { RouteResponse } from "../types";
-import "../styles/RouteResults.scss";
+import { RouteMap } from "./RouteMap";
 
 type RouteResultsProps = {
   loading: boolean;
@@ -11,7 +11,8 @@ export function RouteResults({ loading, error, routeResponse }: RouteResultsProp
   return (
     <section className="card results-card">
       <div className="section-header">
-        <h2>Results</h2>
+        <p className="eyebrow">Results</p>
+        <h2>Dynamic routing output</h2>
       </div>
 
       {loading ? (
@@ -19,45 +20,54 @@ export function RouteResults({ loading, error, routeResponse }: RouteResultsProp
       ) : null}
 
       {error ? <p className="status-banner status-error">{error}</p> : null}
+
+      {!loading && !error && !routeResponse ? (
+        <div className="empty-state">
+          <p>Submit an origin and destination to load the best route or top-k routes.</p>
+        </div>
+      ) : null}
+
       {!loading && routeResponse ? (
         <div className="results-stack">
           <div className="result-summary">
-            <div className="results">
-              <div className="result-item">
-                <p>Model</p>
-                <p>{routeResponse.model.toUpperCase()}</p>
-              </div>
-
-              <div className="result-item">
-                <p>Origin</p>
-                <p>
-                  {routeResponse.origin}
-                  {routeResponse.origin_description
-                  ? ` · ${routeResponse.origin_description}`
-                            : ""}
-                </p>
-              </div>
-              
-              <div className="result-item">
-                <p>Destination</p>
-                <p>
-                  {routeResponse.destination}
-                  {routeResponse.destination_description
-                  ? ` · ${routeResponse.destination_description}`
-                            : ""}
-                </p>
-              </div>
-
-              <div className="result-item">
-                <p>Routes found</p>
-                <p>
-                    {routeResponse.routes_found} / {routeResponse.routes_requested}
-                </p>
-              </div>
+            <div>
+              <dt>Model</dt>
+              <dd>{routeResponse.model}</dd>
             </div>
-
+            <div>
+              <dt>Origin</dt>
+              <dd>
+                {routeResponse.origin}
+                {routeResponse.origin_description
+                  ? ` - ${routeResponse.origin_description}`
+                  : ""}
+              </dd>
+            </div>
+            <div>
+              <dt>Destination</dt>
+              <dd>
+                {routeResponse.destination}
+                {routeResponse.destination_description
+                  ? ` - ${routeResponse.destination_description}`
+                  : ""}
+              </dd>
+            </div>
+            <div>
+              <dt>Routes found</dt>
+              <dd>
+                {routeResponse.routes_found} / {routeResponse.routes_requested}
+              </dd>
+            </div>
           </div>
-           <div className="routes-list">
+
+          <RouteMap
+            sites={routeResponse.sites}
+            routes={routeResponse.routes}
+            origin={routeResponse.origin}
+            destination={routeResponse.destination}
+          />
+
+          <div className="routes-list">
             {routeResponse.routes.map((route, index) => (
               <article key={`${route.path.join("-")}-${index}`} className="route-card">
                 <div className="route-card-header">
@@ -73,7 +83,7 @@ export function RouteResults({ loading, error, routeResponse }: RouteResultsProp
                   <div>
                     <dt>Travel time (sec)</dt>
                     <dd>{route.total_travel_time_sec.toFixed(2)}</dd>
-                         </div>
+                  </div>
                   <div>
                     <dt>Travel time (min)</dt>
                     <dd>{route.total_travel_time_min.toFixed(2)}</dd>
