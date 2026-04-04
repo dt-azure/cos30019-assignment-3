@@ -15,7 +15,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: iconShadow,
 });
 
-const VALID_SITES = [970, 2000, 2820, 3001, 3002, 3127, 3682, 3685, 4057, 4262, 4263, 4264, 4272, 4812];
+const VALID_SITES = [2000, 2200, 2820, 2825, 3001, 3002, 3120, 3122, 3126, 3127, 3180, 3682, 3685, 3812, 4030, 4032, 4035, 4040, 4051, 4057, 4063, 4324];
 const ROUTE_COLORS = ["#2563eb", "#dc2626", "#16a34a", "#d97706", "#7c3aed"];
 
 type EdgeDetail = {
