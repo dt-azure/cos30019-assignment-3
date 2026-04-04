@@ -54,7 +54,7 @@ This is enough for the default web GUI flow with `lightgbm`.
 ### 6. Install the frontend dependencies
 
 ```bash
-cd frontend
+cd dashboard
 npm install
 cd ..
 ```
@@ -84,7 +84,7 @@ Leave that terminal running.
 ### 10. Start the frontend in Terminal 2
 
 ```bash
-cd frontend
+cd dashboard
 npm run dev
 ```
 
@@ -188,7 +188,7 @@ curl -X POST http://127.0.0.1:8000/api/routes/compute \
 machine_learning/   Core ML pipeline, prediction, graph, problem, and route services
 utils/              Shared parsing, graph, search, and utility helpers
 webapi/             Thin FastAPI wrapper
-frontend/           React + Vite frontend
+dashboard/           React + Vite frontend
 scripts/            Topology generation and backend smoke tests
 data/               Traffic data and topology inputs
 main.py             CLI entry point
