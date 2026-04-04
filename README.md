@@ -1,202 +1,258 @@
-# COS30019 Assignment 2B
+# COS30019 Assignment 2B — Traffic-Based Route Guidance System
 
-Traffic-Based Route Guidance System for SCATS traffic prediction and dynamic routing.
+> A web application that uses AI to predict traffic and find the fastest routes in the Boroondara area.
 
-This repo keeps everything in one place:
-- Python backend for ML, prediction, graph updates, and route search
-- FastAPI web API as a thin wrapper over the existing backend services
-- React + Vite frontend for a web-based GUI
-- `main.py` as the existing CLI entry point
+This guide is written for beginners. If you've never used a terminal or run code before, don't worry — just follow the steps one by one.
 
-## Project Structure
+---
 
-```text
-machine_learning/   Core ML pipeline, prediction, graph, problem, and route services
-utils/              Shared parsing, graph, search, and utility helpers
-webapi/             Thin FastAPI wrapper over the backend
-frontend/           React + Vite web UI
-scripts/            Topology generation and backend smoke tests
-data/               Traffic data and topology CSV inputs
-main.py             CLI route entry point
-compare_models.py   Model comparison entry point
+## What This Project Does
+
+Imagine Google Maps, but powered by AI that predicts traffic before you leave. This system:
+
+1. **Predicts traffic** at 40 intersections using 3 AI models (LSTM, GRU, LightGBM)
+2. **Calculates travel time** for every road based on predicted traffic
+3. **Finds the fastest routes** from your starting point to your destination
+4. **Shows everything on a map** with an easy-to-use web interface
+
+---
+
+## Before You Start
+
+You need 2 things installed on your computer:
+
+### 1. Python (already set up)
+This project comes with a Python environment in the `.venv` folder. You don't need to install anything else for Python.
+
+### 2. Node.js (for the web interface)
+If you don't have Node.js installed:
+
+1. Go to https://nodejs.org
+2. Click the **green "LTS" button** (recommended for most users)
+3. Download and run the installer
+4. Restart your computer after installing
+
+To check if Node.js is installed, open **PowerShell** and type:
+
+```powershell
+node --version
 ```
 
-## Data Sources
+If you see a version number (like `v20.x.x`), you're good to go.
 
-- ML training and prediction windows use `data/scats_data_october_2006.xls`
-- Default routing uses:
-  - `data/boroondara_locations.csv`
-  - `data/boroondara_connectivity.csv`
-- Those routing CSVs are generated from:
-  - `data/Traffic_Count_Locations_with_LONG_LAT.csv`
-  - the 40 SCATS site IDs present in the traffic dataset
-- `data/SCATSSiteListingSpreadsheet_VicRoads.xls/.xlsx` is present in the repo but is not used directly in the active routing pipeline
+---
 
-If you need to regenerate the default topology files:
+## How to Run the Web Application
 
-```bash
-./.venv/bin/python scripts/prepare_real_topology.py
+The web app has **2 parts** that need to run at the same time:
+- **Backend** (Python) — does the AI calculations
+- **Frontend** (React) — shows the web page you interact with
+
+Think of it like a restaurant: the backend is the kitchen (cooks the food), and the frontend is the dining room (where you see and order food).
+
+### Step 1: Install Frontend Dependencies
+
+This only needs to be done **once**. It downloads all the tools needed to build the web page.
+
+1. Open **PowerShell**
+2. Navigate to the project folder:
+
+```powershell
+cd C:\Users\vieth\cos30019\cos30019-assignment-3\frontend
 ```
 
-## Backend Setup
+3. Run this command:
 
-This project assumes you are using the existing local virtual environment in `.venv`.
-
-Install the web API dependencies if they are not already installed:
-
-```bash
-./.venv/bin/pip install fastapi uvicorn
-```
-
-## Frontend Setup
-
-Install the React frontend dependencies:
-
-```bash
-cd frontend
+```powershell
 npm install
 ```
 
-## ML Workflow
+You'll see a lot of text scrolling. This is normal — it's downloading packages. Wait until it finishes and you see your cursor again.
 
-### Compare Models
+### Step 2: Train the AI Models
 
-Run the current model comparison:
+This only needs to be done **once** (or when you want to retrain). It teaches the AI models to predict traffic.
 
-```bash
-./.venv/bin/python compare_models.py
+1. Open **PowerShell**
+2. Go to the project folder:
+
+```powershell
+cd C:\Users\vieth\cos30019\cos30019-assignment-3
 ```
 
-Save trained model artifacts while comparing:
+3. Run this command:
 
-```bash
-./.venv/bin/python compare_models.py --save-models
+```powershell
+.\.venv\Scripts\python.exe compare_models.py --save-models
 ```
 
-### Save And Load Models
+This will take **2-3 minutes**. You'll see progress bars for each model. When it's done, you'll see a comparison table like this:
 
-Train and save the default LightGBM bundle:
-
-```bash
-./.venv/bin/python -c "from machine_learning.lightgbm import train_lightgbm; bundle, results = train_lightgbm(save=True); print(results)"
+```
+Model    | MAE     | RMSE    | Time (s)
+---------+---------+---------+---------
+LSTM     | 14.41   | 21.75   | 115.66
+GRU      | 14.30   | 21.66   | 123.55
+LightGBM | 14.02   | 21.20   | 0.57
 ```
 
-Load the saved default prediction bundle:
+The trained models are saved in the `saved_models/` folder.
 
-```bash
-./.venv/bin/python -c "from machine_learning.common.site_flow_service import load_default_prediction_bundle; bundle = load_default_prediction_bundle(); print(bundle['model_type'], bundle['window_size'])"
+### Step 3: Start the Backend (Kitchen)
+
+1. Open a **new PowerShell window**
+2. Go to the project folder:
+
+```powershell
+cd C:\Users\vieth\cos30019\cos30019-assignment-3
 ```
 
-## Run Routing From The CLI
+3. Run this command:
 
-Single best route:
-
-```bash
-./.venv/bin/python main.py --origin 2000 --destination 3002 --model lightgbm
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn webapi.server:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Top-k routes, up to 5:
-
-```bash
-./.venv/bin/python main.py --origin 2000 --destination 3002 --model lightgbm --top-k 5
+You should see:
+```
+INFO:     Uvicorn running on http://127.0.0.1:8000
 ```
 
-The CLI keeps the existing validation behavior for:
-- invalid origin
-- invalid destination
-- origin equals destination
-- no route found
+**Leave this window open.** Don't close it. The backend is now running.
 
-## Run The Backend API
+### Step 4: Start the Frontend (Dining Room)
 
-Start the FastAPI server from the repo root:
+1. Open **another new PowerShell window** (keep the backend window open)
+2. Go to the frontend folder:
 
-```bash
-./.venv/bin/python -m uvicorn webapi.server:app --reload --host 127.0.0.1 --port 8000
+```powershell
+cd C:\Users\vieth\cos30019\cos30019-assignment-3\frontend
 ```
 
-The API is a thin wrapper over the backend and reuses:
-- `machine_learning.common.cli_route_service.compute_terminal_routes`
+3. Run this command:
 
-Available endpoints:
-- `GET /api/health`
-- `GET /api/config`
-- `POST /api/routes/compute`
-
-Example request:
-
-```bash
-curl -X POST http://127.0.0.1:8000/api/routes/compute \
-  -H "Content-Type: application/json" \
-  -d '{"origin": 2000, "destination": 3002, "model": "lightgbm", "top_k": 3}'
-```
-
-## Run The Web Frontend
-
-Start the frontend development server:
-
-```bash
-cd frontend
+```powershell
 npm run dev
 ```
 
-By default, the frontend runs on:
-
-```text
-http://127.0.0.1:5173
+You should see:
+```
+  VITE ready in xxx ms
+  ➜  Local:   http://localhost:5173/
 ```
 
-The frontend proxies `/api` requests to:
+**Leave this window open too.**
 
-```text
-http://127.0.0.1:8000
+### Step 5: Open the Web Page
+
+1. Open your web browser (Chrome, Edge, Firefox)
+2. Type this address: **http://127.0.0.1:5173**
+3. Press Enter
+
+You should see the home page of the Traffic Route Guidance System!
+
+---
+
+## How to Use the Web Application
+
+### Page 1: Home
+The landing page. Click **"Start Route Planning"** to go to the map, or **"View Model Comparison"** to see charts.
+
+### Page 2: Map Prediction (the main feature)
+
+This is where you find routes. Here's how:
+
+1. **Select Origin** — click the dropdown and pick a starting point (e.g., `2000`)
+2. **Select Destination** — click the dropdown and pick where you want to go (e.g., `3002`)
+3. **Choose Model** — pick `lightgbm` (fastest) or try `lstm` / `gru`
+4. **Choose Top-K** — how many route options you want (1 to 5)
+5. Click **"Find Routes"**
+
+After a few seconds, you'll see:
+- **Route options** in the left sidebar with travel times
+- **Routes drawn on the map** in different colors
+- **Click any route** to highlight it and see details
+- **Turn-by-turn directions** with traffic level, speed, and distance
+
+### Page 3: Visualization
+
+Shows how well each AI model performs with charts:
+- **Performance Metrics** — accuracy and speed comparisons
+- **Radar Comparison** — multi-dimensional view of each model's strengths
+- **Insights** — key takeaways from the data
+
+### Page 4: About
+
+Explains the project, technology used, and how everything works.
+
+---
+
+## How to Run from Command Line (No Web Browser)
+
+If you just want a quick route without opening the web page:
+
+```powershell
+.\.venv\Scripts\python.exe main.py --origin 2000 --destination 3002 --model lightgbm
 ```
 
-Recommended local workflow:
+You'll see the best route printed in the terminal.
 
-1. Start the FastAPI server
-2. Start the Vite frontend
-3. Open the frontend in the browser
-4. Enter origin, destination, model, and top-k
-5. Submit the route request
+To get up to 5 route options:
 
-## Run Backend Smoke Checks
-
-Run the non-GUI backend validation sweep:
-
-```bash
-./.venv/bin/python -m scripts.backend_smoke_test
+```powershell
+.\.venv\Scripts\python.exe main.py --origin 2000 --destination 3002 --model lightgbm --top-k 5
 ```
 
-This smoke test covers:
-- saved model loading
-- all-site prediction
-- dynamic graph construction
-- dynamic problem construction
-- single-route solving
-- top-k route solving
-- invalid origin handling
-- invalid destination handling
-- origin equals destination validation
-- no-route handling
+---
 
-## End-To-End Demo Commands
+## Available Locations (SCATS Sites)
 
-Start backend API:
+You can only choose from these 22 locations that have road connections:
 
-```bash
-./.venv/bin/python -m uvicorn webapi.server:app --reload --host 127.0.0.1 --port 8000
+`2000, 2200, 2820, 2825, 3001, 3002, 3120, 3122, 3126, 3127, 3180, 3682, 3685, 3812, 4030, 4032, 4035, 4040, 4051, 4057, 4063, 4324`
+
+---
+
+## Common Problems and How to Fix Them
+
+| Problem | How to Fix |
+|---------|-----------|
+| `npm` is not recognized | Install Node.js from https://nodejs.org and restart your computer |
+| `ModuleNotFoundError: No module named 'joblib'` | Run: `.\.venv\Scripts\python.exe -m pip install joblib` |
+| `ModuleNotFoundError: No module named 'tensorflow'` | Run: `.\.venv\Scripts\python.exe -m pip install tensorflow` |
+| Web page is blank/white | Make sure the backend (Step 3) is still running in its terminal window |
+| "No route found" | Make sure both origin and destination are in the list of 22 valid sites above |
+| Port 8000 already in use | Close any other program using port 8000, or restart your computer |
+| `npm install` gives errors | Run: `npm install --legacy-peer-deps` instead |
+
+---
+
+## How to Stop the Application
+
+When you're done:
+
+1. Go to each terminal window
+2. Press **Ctrl + C** to stop the program
+3. Close the terminal windows
+
+---
+
+## Project Structure (for reference)
+
+```
+machine_learning/     AI models and prediction logic
+utils/                Helper functions for calculations
+webapi/               Backend server code
+frontend/             Web page code (React)
+data/                 Traffic data and road network info
+saved_models/         Trained AI models (created after Step 2)
+main.py               Command-line entry point
+compare_models.py     Model training script
 ```
 
-Start frontend:
+---
 
-```bash
-cd frontend
-npm run dev
-```
+## Need Help?
 
-Run CLI directly:
-
-```bash
-./.venv/bin/python main.py --origin 2000 --destination 3002 --model lightgbm --top-k 5
-```
+- Check the `EXECUTION_GUIDE.md` file for more detailed commands
+- Ask your tutor if something doesn't work
