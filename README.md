@@ -2,92 +2,126 @@
 
 Traffic-Based Route Guidance System for SCATS traffic prediction and dynamic routing.
 
-This repo keeps everything in one place:
-- Python backend for ML, prediction, graph updates, and route search
-- FastAPI web API as a thin wrapper over the existing backend services
-- React + Vite frontend for a web-based GUI
-- `main.py` as the existing CLI entry point
+This repository includes:
+- the Python backend for ML, prediction, graph updates, and route search
+- a thin FastAPI wrapper in `webapi/`
+- a React + Vite frontend in `frontend/`
+- a CLI entry point in `main.py`
 
-## Project Structure
+Important note:
+- the repo already includes saved model files in `saved_models/`
+- you do not need to retrain a model just to run the GUI
+- the default and recommended GUI model is `lightgbm`
 
-```text
-machine_learning/   Core ML pipeline, prediction, graph, problem, and route services
-utils/              Shared parsing, graph, search, and utility helpers
-webapi/             Thin FastAPI wrapper over the backend
-frontend/           React + Vite web UI
-scripts/            Topology generation and backend smoke tests
-data/               Traffic data and topology CSV inputs
-main.py             CLI route entry point
-compare_models.py   Model comparison entry point
+## Quick Start From A Fresh Clone
+
+Follow these commands in order.
+
+### 1. Clone the repo and enter it
+
+```bash
+git clone <your-github-repo-url>
+cd COS30019-ASSIGNMENT-3
 ```
 
-## Data Sources
+### 2. Check that Python and npm are available
 
-- ML training and prediction windows use `data/scats_data_october_2006.xls`
-- Default routing uses:
-  - `data/boroondara_locations.csv`
-  - `data/boroondara_connectivity.csv`
-- Those routing CSVs are generated from:
-  - `data/Traffic_Count_Locations_with_LONG_LAT.csv`
-  - the 40 SCATS site IDs present in the traffic dataset
-- `data/SCATSSiteListingSpreadsheet_VicRoads.xls/.xlsx` is present in the repo but is not used directly in the active routing pipeline
+```bash
+python3 --version
+npm --version
+```
 
-If you need to regenerate the default topology files:
+### 3. Create a virtual environment
+
+```bash
+python3 -m venv .venv
+```
+
+### 4. Upgrade pip
+
+```bash
+./.venv/bin/python -m pip install --upgrade pip
+```
+
+### 5. Install the Python dependencies needed to run the backend and GUI
+
+```bash
+./.venv/bin/pip install numpy pandas scikit-learn joblib lightgbm xlrd fastapi uvicorn
+```
+
+This is enough for the default web GUI flow with `lightgbm`.
+
+### 6. Install the frontend dependencies
+
+```bash
+cd frontend
+npm install
+cd ..
+```
+
+### 7. Regenerate the default topology files
 
 ```bash
 ./.venv/bin/python scripts/prepare_real_topology.py
 ```
 
-## Backend Setup
-
-This project assumes you are using the existing local virtual environment in `.venv`.
-
-Install the web API dependencies if they are not already installed:
+### 8. Run the backend smoke test
 
 ```bash
-./.venv/bin/pip install fastapi uvicorn
+./.venv/bin/python -m scripts.backend_smoke_test
 ```
 
-## Frontend Setup
+If this passes, the backend is ready.
 
-Install the React frontend dependencies:
+### 9. Start the backend API in Terminal 1
+
+```bash
+./.venv/bin/python -m uvicorn webapi.server:app --reload --host 127.0.0.1 --port 8000
+```
+
+Leave that terminal running.
+
+### 10. Start the frontend in Terminal 2
 
 ```bash
 cd frontend
-npm install
+npm run dev
 ```
 
-## ML Workflow
+### 11. Open the GUI in your browser
 
-### Compare Models
+```text
+http://127.0.0.1:5173
+```
 
-Run the current model comparison:
+### 12. Use the GUI
+
+In the web GUI:
+- enter an origin SCATS site ID
+- enter a destination SCATS site ID
+- keep the model as `lightgbm` unless you have installed extra dependencies
+- choose `top-k` from 1 to 5
+- click the route button
+
+Good first test:
+- origin: `2000`
+- destination: `3002`
+- model: `lightgbm`
+- top-k: `1` or `5`
+
+## If You Want To Use LSTM Or GRU Later
+
+The GUI and API default to `lightgbm`. If you also want the `lstm` or `gru` models, install TensorFlow:
 
 ```bash
-./.venv/bin/python compare_models.py
+./.venv/bin/pip install tensorflow
 ```
 
-Save trained model artifacts while comparing:
+Without TensorFlow, keep using `lightgbm`.
 
-```bash
-./.venv/bin/python compare_models.py --save-models
-```
+## Useful Commands After Setup
 
-### Save And Load Models
-
-Train and save the default LightGBM bundle:
-
-```bash
-./.venv/bin/python -c "from machine_learning.lightgbm import train_lightgbm; bundle, results = train_lightgbm(save=True); print(results)"
-```
-
-Load the saved default prediction bundle:
-
-```bash
-./.venv/bin/python -c "from machine_learning.common.site_flow_service import load_default_prediction_bundle; bundle = load_default_prediction_bundle(); print(bundle['model_type'], bundle['window_size'])"
-```
-
-## Run Routing From The CLI
+### Run the CLI directly
 
 Single best route:
 
@@ -95,27 +129,33 @@ Single best route:
 ./.venv/bin/python main.py --origin 2000 --destination 3002 --model lightgbm
 ```
 
-Top-k routes, up to 5:
+Top-k routes:
 
 ```bash
 ./.venv/bin/python main.py --origin 2000 --destination 3002 --model lightgbm --top-k 5
 ```
 
-The CLI keeps the existing validation behavior for:
-- invalid origin
-- invalid destination
-- origin equals destination
-- no route found
-
-## Run The Backend API
-
-Start the FastAPI server from the repo root:
+### Run the model comparison script
 
 ```bash
-./.venv/bin/python -m uvicorn webapi.server:app --reload --host 127.0.0.1 --port 8000
+./.venv/bin/python compare_models.py
 ```
 
-The API is a thin wrapper over the backend and reuses:
+Save models while comparing:
+
+```bash
+./.venv/bin/python compare_models.py --save-models
+```
+
+### Load the saved default prediction bundle
+
+```bash
+./.venv/bin/python -c "from machine_learning.common.site_flow_service import load_default_prediction_bundle; bundle = load_default_prediction_bundle(); print(bundle['model_type'], bundle['window_size'])"
+```
+
+## API Endpoints
+
+The FastAPI layer is thin and reuses the existing backend route pipeline through:
 - `machine_learning.common.cli_route_service.compute_terminal_routes`
 
 Available endpoints:
@@ -131,72 +171,26 @@ curl -X POST http://127.0.0.1:8000/api/routes/compute \
   -d '{"origin": 2000, "destination": 3002, "model": "lightgbm", "top_k": 3}'
 ```
 
-## Run The Web Frontend
+## Data Sources
 
-Start the frontend development server:
+- ML training and prediction windows use `data/scats_data_october_2006.xls`
+- default routing uses:
+  - `data/boroondara_locations.csv`
+  - `data/boroondara_connectivity.csv`
+- those routing CSVs are generated from:
+  - `data/Traffic_Count_Locations_with_LONG_LAT.csv`
+  - the 40 SCATS site IDs present in the traffic dataset
+- `data/SCATSSiteListingSpreadsheet_VicRoads.xls/.xlsx` is not used directly in the active routing path
 
-```bash
-cd frontend
-npm run dev
-```
-
-By default, the frontend runs on:
-
-```text
-http://127.0.0.1:5173
-```
-
-The frontend proxies `/api` requests to:
+## Project Structure
 
 ```text
-http://127.0.0.1:8000
-```
-
-Recommended local workflow:
-
-1. Start the FastAPI server
-2. Start the Vite frontend
-3. Open the frontend in the browser
-4. Enter origin, destination, model, and top-k
-5. Submit the route request
-
-## Run Backend Smoke Checks
-
-Run the non-GUI backend validation sweep:
-
-```bash
-./.venv/bin/python -m scripts.backend_smoke_test
-```
-
-This smoke test covers:
-- saved model loading
-- all-site prediction
-- dynamic graph construction
-- dynamic problem construction
-- single-route solving
-- top-k route solving
-- invalid origin handling
-- invalid destination handling
-- origin equals destination validation
-- no-route handling
-
-## End-To-End Demo Commands
-
-Start backend API:
-
-```bash
-./.venv/bin/python -m uvicorn webapi.server:app --reload --host 127.0.0.1 --port 8000
-```
-
-Start frontend:
-
-```bash
-cd frontend
-npm run dev
-```
-
-Run CLI directly:
-
-```bash
-./.venv/bin/python main.py --origin 2000 --destination 3002 --model lightgbm --top-k 5
+machine_learning/   Core ML pipeline, prediction, graph, problem, and route services
+utils/              Shared parsing, graph, search, and utility helpers
+webapi/             Thin FastAPI wrapper
+frontend/           React + Vite frontend
+scripts/            Topology generation and backend smoke tests
+data/               Traffic data and topology inputs
+main.py             CLI entry point
+compare_models.py   Model comparison entry point
 ```
