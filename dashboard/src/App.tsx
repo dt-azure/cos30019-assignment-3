@@ -4,8 +4,9 @@ import { DataSourcesPanel } from "./components/DataSourcesPanel";
 import { RouteForm } from "./components/RouteForm";
 import { RouteResults } from "./components/RouteResults";
 import { computeRoutes, fetchAppConfig } from "./lib/api";
-import type { AppConfig, RouteResponse, SiteOption } from "./types";
-import MapPage from "./components/MapPage";
+import type { AppConfig, RouteResponse, SiteOption, Site } from "./types";
+import { MapView } from "./components/MapView";
+import { loadSites } from "./lib/helper";
 
 import Header from "./components/Header";
 
@@ -36,6 +37,7 @@ export default function App() {
   const [loadingRoutes, setLoadingRoutes] = useState(false);
   const [routeError, setRouteError] = useState<string | null>(null);
   const [routeResponse, setRouteResponse] = useState<RouteResponse | null>(null);
+  const [processedSites, setProcessedSites] = useState<Site[]>([]);
 
   useEffect(() => {
     let active = true;
@@ -67,6 +69,8 @@ export default function App() {
     }
 
     void loadConfig();
+
+    loadSites().then(setProcessedSites);
 
     return () => {
       active = false;
@@ -162,7 +166,7 @@ export default function App() {
                 />
 
                 <div className="card map-container">
-                  <MapPage/>
+                  <MapView sites={processedSites} routes={routeResponse?.routes ?? []}/>
                 </div>
             </div>
           </div>

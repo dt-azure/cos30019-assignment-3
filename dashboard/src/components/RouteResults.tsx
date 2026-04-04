@@ -1,4 +1,5 @@
 import type { RouteResponse } from "../types";
+import "../styles/RouteResults.scss";
 
 type RouteResultsProps = {
   loading: boolean;
@@ -21,34 +22,40 @@ export function RouteResults({ loading, error, routeResponse }: RouteResultsProp
       {!loading && routeResponse ? (
         <div className="results-stack">
           <div className="result-summary">
-            <div>
-              <dt>Model</dt>
-              <dd>{routeResponse.model}</dd>
-            </div>
-            <div>
-              <dt>Origin</dt>
-              <dd>
-                {routeResponse.origin}
-                {routeResponse.origin_description
+            <div className="results">
+              <div>
+                <p>Model</p>
+                <p>{routeResponse.model.toUpperCase()}</p>
+              </div>
+
+              <div>
+                <p>Origin</p>
+                <p>
+                  {routeResponse.origin}
+                  {routeResponse.origin_description
                   ? ` · ${routeResponse.origin_description}`
                             : ""}
-              </dd>
-            </div>
-            <div>
-              <dt>Destination</dt>
-              <dd>
-                {routeResponse.destination}
-                {routeResponse.destination_description
+                </p>
+              </div>
+              
+              <div>
+                <p>Destination</p>
+                <p>
+                  {routeResponse.destination}
+                  {routeResponse.destination_description
                   ? ` · ${routeResponse.destination_description}`
                             : ""}
-              </dd>
+                </p>
+              </div>
+
+              <div>
+                <p>Routes found</p>
+                <p>
+                    {routeResponse.routes_found} / {routeResponse.routes_requested}
+                </p>
+              </div>
             </div>
-            <div>
-              <dt>Routes found</dt>
-              <dd>
-                {routeResponse.routes_found} / {routeResponse.routes_requested}
-              </dd>
-            </div>
+
           </div>
            <div className="routes-list">
             {routeResponse.routes.map((route, index) => (
