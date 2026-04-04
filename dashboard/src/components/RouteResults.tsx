@@ -23,12 +23,12 @@ export function RouteResults({ loading, error, routeResponse }: RouteResultsProp
         <div className="results-stack">
           <div className="result-summary">
             <div className="results">
-              <div>
+              <div className="result-item">
                 <p>Model</p>
                 <p>{routeResponse.model.toUpperCase()}</p>
               </div>
 
-              <div>
+              <div className="result-item">
                 <p>Origin</p>
                 <p>
                   {routeResponse.origin}
@@ -38,7 +38,7 @@ export function RouteResults({ loading, error, routeResponse }: RouteResultsProp
                 </p>
               </div>
               
-              <div>
+              <div className="result-item">
                 <p>Destination</p>
                 <p>
                   {routeResponse.destination}
@@ -48,7 +48,7 @@ export function RouteResults({ loading, error, routeResponse }: RouteResultsProp
                 </p>
               </div>
 
-              <div>
+              <div className="result-item">
                 <p>Routes found</p>
                 <p>
                     {routeResponse.routes_found} / {routeResponse.routes_requested}
