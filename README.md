@@ -20,6 +20,7 @@ This project includes:
 ### Backend
 - FastAPI
 - Uvicorn
+- tensorflow
 - scikit-learn
 - LightGBM
 - pandas
@@ -126,7 +127,7 @@ python -m pip install --upgrade pip
 Then install the required backend packages:
 
 ```bash
-pip install numpy pandas scikit-learn joblib lightgbm xlrd fastapi uvicorn
+pip install numpy pandas tensorflow scikit-learn joblib lightgbm xlrd fastapi uvicorn
 ```
 
 This is enough for the default backend and GUI flow using `lightgbm`.
