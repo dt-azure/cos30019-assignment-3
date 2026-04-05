@@ -89,8 +89,8 @@
 
 [TC18] End-to-end pipeline: PASS
   Category: C (Integration)
-  Details: Total pipeline time=3.720s | Load=0.019s, Windows=1.645s, Predict=0.117s, Graph=0.118s, Solve=0.111s | Route=2000 -> 3120 -> 3001 -> 3002 (314.1s)
-  Metrics: {'total_time': 3.7202842235565186, 'load_time': 0.019290924072265625, 'window_time': 1.6447803974151611, 'predict_time': 0.11689949035644531, 'graph_time': 0.11791849136352539, 'solve_time': 0.1110384464263916, 'route_path': [2000, 3120, 3001, 3002], 'route_time': 314.08944210755703}
+  Details: Total pipeline time=3.766s | Load=0.031s, Windows=1.624s, Predict=0.125s, Graph=0.124s, Solve=0.189s | Route=2000 -> 3120 -> 3001 -> 3002 (314.1s)
+  Metrics: {'total_time': 3.765875816345215, 'load_time': 0.031075239181518555, 'window_time': 1.6242382526397705, 'predict_time': 0.12532472610473633, 'graph_time': 0.12389683723449707, 'solve_time': 0.18872761726379395, 'route_path': [2000, 3120, 3001, 3002], 'route_time': 314.08944210755703}
 
 [TC19] Multiple O-D pairs: PASS
   Category: C (Integration)
@@ -99,8 +99,8 @@
 
 [TC20] Search algorithm correctness: PASS
   Category: C (Integration)
-  Details: Both A* and UCS found valid routes with same optimal cost (314.1s), A* compute=1.7111s, UCS compute=1.8069s
-  Metrics: {'algorithms_tested': ['astar', 'uniform_cost'], 'astar_time': 314.08944210755703, 'ucs_time': 314.08944210755703, 'astar_compute': 1.7110519409179688, 'ucs_compute': 1.8069121837615967}
+  Details: Both A* and UCS found valid routes with same optimal cost (314.1s), A* compute=2.5402s, UCS compute=2.6070s
+  Metrics: {'algorithms_tested': ['astar', 'uniform_cost'], 'astar_time': 314.08944210755703, 'ucs_time': 314.08944210755703, 'astar_compute': 2.5401601791381836, 'ucs_compute': 2.6069650650024414}
 
 
 Total: 20 tests | Passed: 20 | Failed: 0
