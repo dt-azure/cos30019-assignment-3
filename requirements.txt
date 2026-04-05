@@ -1,0 +1,31 @@
+# ============================================================
+# requirements.txt — COS30019 Assignment 3
+# Traffic-Based Route Guidance System
+# Python 3.13
+# ============================================================
+
+# --- Core / Data Processing ---
+pandas
+
+# --- Numerical Computing ---
+numpy
+
+# --- Machine Learning ---
+lightgbm
+scikit-learn
+joblib
+
+# --- Deep Learning (required for LSTM & GRU only) ---
+# Comment out or remove if you only use LightGBM.
+# tensorflow
+
+# --- Web API ---
+fastapi
+pydantic
+uvicorn
+
+# --- Geospatial / Mapping ---
+osmnx
+
+# --- Progress Bars ---
+tqdm
