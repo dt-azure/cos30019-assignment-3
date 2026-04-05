@@ -130,8 +130,8 @@ def _load_site_options(locations_csv: str = DEFAULT_LOCATIONS_CSV) -> list[SiteO
             SiteOption(
                 site_id=int(row["NB_SCATS_SITE"]),
                 description=row.get("SITE_DESC") or None,
-                latitude=float(row["SNAPPED_LATITUDE"]) if row.get("SNAPPED_LATITUDE") else None,
-                longitude=float(row["SNAPPED_LONGITUDE"]) if row.get("SNAPPED_LONGITUDE") else None,
+            latitude=float(row.get("SNAPPED_LATITUDE") or row.get("LATITUDE")) if row.get("SNAPPED_LATITUDE") or row.get("LATITUDE") else None,
+            longitude=float(row.get("SNAPPED_LONGITUDE") or row.get("LONGITUDE")) if row.get("SNAPPED_LONGITUDE") or row.get("LONGITUDE") else None,
             )
             for row in sorted(
                 reader,
