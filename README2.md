@@ -56,6 +56,18 @@ Expected output:
 All backend smoke checks passed.
 ```
 
+Generate the default topology files:
+
+```bash
+python scripts/prepare_real_topology.py
+```
+
+Generate snapped coordinates for each node:
+
+```bash
+python scripts/snap_map_coords.py
+```
+
 ### 3. Run backend
 
 ```bash
