@@ -1,0 +1,52 @@
+COS30019 - Introduction to AI Assignment 2
+learned (e.g., machine learning for forecasting traffic volume, graph-based search for optimal paths) to solve
+a real-world problem.
+Report file
+You must also include a report which has to be either in Microsoft Word or in PDF whose name is your Team
+ID (for example, 123.PDF) containing your report. The aim of this report is for you to summarise your
+understanding of the problem and the algorithms you have used to solve the problem. We are most
+interested in the insights you have gained, especially those using data obtained by running your
+software.
+Report Details: The report must be between 8 and 10 pages (excluding cover page and TOC).
+• Cover page: including details of all group members (i.e., full names and student IDs), signed by all
+members of the group.
+• Table of contents (TOC).
+• Instructions: Basic instructions of how to use your program. You can also include a note containing
+anything else you want to tell the marker, such as how to use the GUI version of your program, and
+something particular about your implementation.
+• Introduction: Introduce the Traffic Prediction and Traffic-based Route Guidance Problem and
+concise information about the algorithms the team have implemented.
+• Features/Bugs/Missing: Include a list of the features you have implemented. Clearly state if a
+required feature has not been implemented. Failure to do this will result in penalties. Include a list of
+any known bugs. Also, anything else you want to tell the marker, such as how to use the GUI version
+of your program, and something particular about your implementation.
+• Testing: Provide an overview of the test cases you have created to test your program (either
+manually or automatically). Report the results of testing your program. By testing, we refer to both
+the evaluation of the ML models and the software testing you have conducted to ensure that the
+software works well.
+• Insights: Present and discuss the qualities of different ML algorithms used in your assignment.
+Which algorithms are better and why? Use data collected to support your points.
+• Research (if applicable): If you managed to do some additional research to improve the program in
+some ways, please report it here.
+• Conclusion: Conclude with a discussion about ML algorithms and their suitability to the problem
+and about the integration of different modules to produce the end-to-end TBRGS. Include thoughts
+about how you could improve performance.
+• Acknowledgements/Resources: Include in your report a list of the resources you have used to
+create your work. A simple list of URL's is not enough. Include with each entry a basic description of
+how the person or website assisted you in your work.
+• References: Cite the sources you referred to in your Assignment (implementation, report, etc.)
+Tips:
+• All figures and tables need to be properly captioned with sensible descriptions.
+• Report presentation should include header/footer information (pages numbers, etc.)
+Marking Scheme:
+Requirements (or equivalent sections)
+Mark
+Implement appropriate data processing programs to extract data from the provided dataset and 9
+store data in appropriate data structures to enable ML models to be trained & tested
+Implement at least 3 ML algorithms (including LSTM and GRU and an algorithm of your choice) 7(x3)
+for traffic flow prediction.
+Conduct comprehensive evaluation to compare different ML models 15
+Integration of Part A & Part B to develop an end-to-end software for TBRGS 15
+Testing: At least 10 test cases have been created to cover different problem scenarios. Test 10
+results have been checked and documented.
+Page 2 of 3

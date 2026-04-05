@@ -1,0 +1,37 @@
+COS30019 - Introduction to AI Assignment 2
+Report: Clear and provide sufficient information about the problem and your algorithm/solution 15
+AND the insights you have obtained through your program.
+Research: If you show some initiatives in researching about the problem and solutions, or 15
+carrying out extensive tests to provide interesting data about the algorithms, or getting some
+clever optimization, etc. with a well-written Research section in the report to discuss and
+demonstrate these initiatives
+Total 100
+You need to follow good programming practice (e.g., well-designed, well-structure codes with Up to
+clear and helpful comments). Failure to do so get penalty. -10
+For each individual student: (the maximum mark a student can get for Assignment 2B is 100
+and the minimum mark is 0) Mark
+Up to
+Failure to provide in class updates of the assignment progress to your tutor. -40
+Failure to contribute to the work performed by the team or to collaborate with other team Up to
+members to achieve the desired outcomes for the project. -80
+Some ideas for research initiatives
+- The standard version of the system only deals with a small area of Melbourne (the city of
+Boroondara) and uses a very small dataset (traffic volume data for the month of October 2006).
+Under this research initiative, you can look at more comprehensive datasets from VicRoads for the
+whole Victoria in multiple years. Data processing for large amount of data will be a challenge.
+- The provided dataset may not provide you with details you need. You may want to consider other
+sources of open data. A good dataset can be found here:
+https://discover.data.vic.gov.au/dataset/traffic-signal-volume-data
+Some other popular data sources are: https://github.com/mas-dse-
+c6sander/DSE_Cohort2_Traffic_Capstone/wiki/PeMS-Data-Information and
+https://www.data.gov.uk/dataset/9562c512-4a0b-45ee-b6ad-afc0f99b841f/highways-england-
+network-journey-time-and-traffic-flow-data. Under this research initiative, you can choose one of
+these datasets or a good data source you have access to (and get your tutor’s approval) and extend
+this project to deal with the selected network and dataset.
+- Visualising your system predictions and route recommendations. Inspired by Google Maps Traffic,
+can you build something similar using open source resources such as OpenStreetMap?
+Note: For some reason, the Latitude and Longitude of the SCATS sites do not map correctly to the
+actual intersections on Google Maps, you’ll have to make adjustments to overcome this issue.
+- For other ideas, please feel free to do the research yourselves and discuss with your tutors to get
+their approval first before doing the research component.
+Page 3 of 3

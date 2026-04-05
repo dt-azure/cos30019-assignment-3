@@ -1,0 +1,106 @@
+======================================================================
+  TEST RESULTS — COS30019 Assignment 3
+======================================================================
+
+[TC01] Normal day prediction: PASS
+  Category: A (ML)
+  Details: Predicted=34.04, Actual=34.00, Error=0.04 (0.1%)
+  Metrics: {'predicted': 34.03507041492094, 'actual': 34.0, 'error': 0.035070414920937765, 'pct_error': 0.10314827917922871}
+
+[TC02] Peak hour prediction: PASS
+  Category: A (ML)
+  Details: Peak predicted=363.28, Peak actual=471.00, Dataset median=132.00, Above median
+  Metrics: {'predicted': 363.2769818062649, 'actual': 471.0, 'median': 132.0, 'above_median': True}
+
+[TC03] Off-peak prediction: PASS
+  Category: A (ML)
+  Details: Off-peak predicted=6.65, Off-peak actual=0.00, Dataset median=132.00, Below median
+  Metrics: {'predicted': 6.649013311543407, 'actual': 0.0, 'median': 132.0, 'below_median': True}
+
+[TC04] Model predicts new data: PASS
+  Category: A (ML)
+  Details: All 5 sites predicted successfully: 970=21.48, 2000=63.81, 2200=17.81, 3001=125.55, 3002=36.25
+  Metrics: {'sites_tested': 5, 'predictions': {970: 21.484514965032087, 2000: 63.806430840557574, 2200: 17.811882754700093, 3001: 125.54783728471733, 3002: 36.24554855390011}}
+
+[TC05] Overall model accuracy: PASS
+  Category: A (ML)
+  Details: MAE=17.42, RMSE=24.59, MaxError=121.44, MAPE=32.8% (over 160 predictions, 8 sites)
+  Metrics: {'mae': 17.424668187782054, 'rmse': 24.594509714163173, 'max_error': 121.441232725405, 'mape': 32.79937541229563, 'total_predictions': 160, 'sites': 8}
+
+[TC06] Prediction consistency: PASS
+  Category: A (ML)
+  Details: 5 runs all returned 307.0491 (deterministic OK)
+  Metrics: {'runs': 5, 'prediction': 307.0491345311827, 'unique_count': 1}
+
+[TC07] Load saved model: PASS
+  Category: B (Software)
+  Details: Model type=lightgbm, window_size=4, scalers=40 sites
+  Metrics: {'model_type': 'lightgbm', 'window_size': 4, 'scaler_count': 40}
+
+[TC08] Predict all sites: PASS
+  Category: B (Software)
+  Details: 40 sites predicted, min=3.77 (site 2846), max=125.55 (site 3001)
+  Metrics: {'total_sites': 40, 'min_site': 2846, 'min_value': 3.7678738759751518, 'max_site': 3001, 'max_value': 125.54783728471733}
+
+[TC09] Build dynamic graph: PASS
+  Category: B (Software)
+  Details: Graph has 7 nodes, 6 directed edges, avg edge cost=96.35s
+  Metrics: {'nodes': 7, 'edges': 6, 'avg_cost': np.float64(96.3482403512595)}
+
+[TC10] Valid route returns 1-5 paths: PASS
+  Category: B (Software)
+  Details: 2 routes found: Route 1: 2000 -> 3120 -> 3001 -> 3002 (314.1s); Route 2: 2000 -> 2200 -> 2820 -> 3001 -> 3002 (337.4s)
+  Metrics: {'routes_found': 2, 'costs': [314.08944210755703, 337.37384997158927], 'paths': [[2000, 3120, 3001, 3002], [2000, 2200, 2820, 3001, 3002]]}
+
+[TC11] Origin = Destination handling: PASS
+  Category: B (Software)
+  Details: Correctly raised ValueError for origin == destination
+  Metrics: {'exception': 'ValueError'}
+
+[TC12] Invalid origin handling: PASS
+  Category: B (Software)
+  Details: Correctly raised KeyError for non-existent origin site 999999
+  Metrics: {'exception': 'KeyError', 'invalid_site': 999999}
+
+[TC13] Invalid destination handling: PASS
+  Category: B (Software)
+  Details: Correctly raised KeyError for non-existent destination site 999999
+  Metrics: {'exception': 'KeyError', 'invalid_site': 999999}
+
+[TC14] No route found handling: PASS
+  Category: B (Software)
+  Details: Correctly raised ValueError when no path exists (2000 to 4030)
+  Metrics: {'exception': 'ValueError', 'origin': 2000, 'destination': 4030}
+
+[TC15] Single best route correctness: PASS
+  Category: B (Software)
+  Details: Path=2000 -> 3120 -> 3001 -> 3002, Time=314.09s
+  Metrics: {'path': [2000, 3120, 3001, 3002], 'time': 314.08944210755703, 'expected_path': [2000, 3120, 3001, 3002]}
+
+[TC16] Route uses ML travel time: PASS
+  Category: C (Integration)
+  Details: Route time=314.09s, 40 sites predicted, 6 edges with avg cost=96.35s
+  Metrics: {'route_time': 314.08944210755703, 'predicted_sites': 40, 'edge_count': 6, 'avg_edge_cost': 96.3482403512595}
+
+[TC17] Route changes with traffic: PASS
+  Category: C (Integration)
+  Details: 2 routes found, 2 unique paths, cost range=314.1s–337.4s (diff=23.3s, 7.4%), sorted=Yes
+  Metrics: {'routes': 2, 'unique_paths': 2, 'costs': [314.08944210755703, 337.37384997158927], 'is_sorted': True, 'cost_diff_pct': 7.413304856028463}
+
+[TC18] End-to-end pipeline: PASS
+  Category: C (Integration)
+  Details: Total pipeline time=3.720s | Load=0.019s, Windows=1.645s, Predict=0.117s, Graph=0.118s, Solve=0.111s | Route=2000 -> 3120 -> 3001 -> 3002 (314.1s)
+  Metrics: {'total_time': 3.7202842235565186, 'load_time': 0.019290924072265625, 'window_time': 1.6447803974151611, 'predict_time': 0.11689949035644531, 'graph_time': 0.11791849136352539, 'solve_time': 0.1110384464263916, 'route_path': [2000, 3120, 3001, 3002], 'route_time': 314.08944210755703}
+
+[TC19] Multiple O-D pairs: PASS
+  Category: C (Integration)
+  Details: 2/3 O-D pairs solved: 2000 to 3002: 2000 -> 3120 -> 3001 -> 3002 (314.1s); 2200 to 2820: 2200 -> 2820 (96.0s) | 1 pairs had no route
+  Metrics: {'pairs_tested': 3, 'pairs_solved': 2, 'pairs_failed': 1, 'results': [{'origin': 2000, 'destination': 3002, 'path': [2000, 3120, 3001, 3002], 'time': 314.08944210755703}, {'origin': 2200, 'destination': 2820, 'path': [2200, 2820], 'time': 96.0}]}
+
+[TC20] Search algorithm correctness: PASS
+  Category: C (Integration)
+  Details: Both A* and UCS found valid routes with same optimal cost (314.1s), A* compute=1.7111s, UCS compute=1.8069s
+  Metrics: {'algorithms_tested': ['astar', 'uniform_cost'], 'astar_time': 314.08944210755703, 'ucs_time': 314.08944210755703, 'astar_compute': 1.7110519409179688, 'ucs_compute': 1.8069121837615967}
+
+
+Total: 20 tests | Passed: 20 | Failed: 0
