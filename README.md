@@ -1,170 +1,375 @@
 # COS30019 Assignment 2B — Traffic-Based Route Guidance System
 
-> An AI-powered web application that predicts traffic flow and finds the fastest routes in the Boroondara area.
+Traffic-Based Route Guidance System for SCATS traffic prediction and dynamic routing.
 
-This is the Assignment 2B submission for the course **COS30019 - Introduction to AI**.
+This project includes:
+- a Python backend for machine learning, traffic prediction, graph updates, and route search
+- a thin FastAPI API wrapper in `webapi/`
+- a React + Vite frontend in `dashboard/`
+- a CLI entry point in `main.py`
+
+> Important:
+> - The repository already includes saved model files in `saved_models/`
+> - You do **not** need to retrain a model to run the web app or CLI
+> - The default and recommended model is `lightgbm`
 
 ---
 
-## Project Structure (Folder Tree)
-# COS30019 Assignment 2B
+## Tech Stack
 
-Traffic-Based Route Guidance System for SCATS traffic prediction and dynamic routing.
+### Backend
+- FastAPI
+- Uvicorn
+- scikit-learn
+- LightGBM
+- pandas
+- numpy
 
-This repository includes:
-- the Python backend for ML, prediction, graph updates, and route search
-- a thin FastAPI wrapper in `webapi/`
-- a React + Vite frontend in `frontend/`
-- a CLI entry point in `main.py`
+### Frontend
+- Vite
+- npm
+- Leaflet
+- OSRM API
 
-Important note:
-- the repo already includes saved model files in `saved_models/`
-- you do not need to retrain a model just to run the GUI
-- the default and recommended GUI model is `lightgbm`
+---
 
-## Quick Start From A Fresh Clone
+## Prerequisites
 
-Follow these commands in order.
+Make sure you have the following installed:
 
-### 1. Clone the repo and enter it
+- **Python 3.13+**  
+  Download: https://www.python.org/downloads/
 
-```bash
-git clone <your-github-repo-url>
-cd COS30019-ASSIGNMENT-3
-```
+- **Node.js** (includes npm)  
+  Download: https://nodejs.org/en/download/current
 
-### 2. Check that Python and npm are available
+You can verify the installation with:
 
 ```bash
 python3 --version
 npm --version
 ```
 
-### 3. Create a virtual environment
+---
+
+## Project Structure
+
+```text
+COS30019-ASSIGNMENT-3/
+│
+├── data/                       # Traffic data and topology inputs
+├── machine_learning/           # Core ML pipeline, prediction, graph, and route services
+├── utils/                      # Shared parsing, graph, search, and helper utilities
+├── webapi/                     # FastAPI backend wrapper
+├── dashboard/                  # React + Vite frontend
+├── scripts/                    # Utility scripts and backend smoke tests
+├── saved_models/               # Pretrained / saved models
+├── main.py                     # CLI entry point
+└── compare_models.py           # Model comparison script
+```
+
+---
+
+## Setup Guide (From Fresh Clone to Running the Full App)
+
+This section is for a new user who has just cloned the repository and wants to set everything up from scratch.
+
+### 1. Clone the repository
+
+```bash
+git clone <your-github-repo-url>
+cd COS30019-ASSIGNMENT-3
+```
+
+---
+
+### 2. Create a Python virtual environment
+
+It is recommended to use a virtual environment for the backend.
+
+#### On macOS / Linux
 
 ```bash
 python3 -m venv .venv
 ```
 
-### 4. Upgrade pip
+Activate it:
 
 ```bash
-./.venv/bin/python -m pip install --upgrade pip
+source .venv/bin/activate
 ```
 
-### 5. Install the Python dependencies needed to run the backend and GUI
+#### On Windows (Command Prompt)
 
 ```bash
-./.venv/bin/pip install numpy pandas scikit-learn joblib lightgbm xlrd fastapi uvicorn
+python -m venv .venv
+.venv\Scripts\activate
 ```
 
-This is enough for the default web GUI flow with `lightgbm`.
-
-### 6. Install the frontend dependencies
+#### On Windows (PowerShell)
 
 ```bash
-cd dashboard
-npm install
-cd ..
+python -m venv .venv
+.venv\Scripts\Activate.ps1
 ```
 
-### 7. Regenerate the default topology files
+---
+
+### 3. Install backend dependencies
+
+Upgrade pip first:
 
 ```bash
-./.venv/bin/python scripts/prepare_real_topology.py
+python -m pip install --upgrade pip
 ```
 
-### 8. Run the backend smoke test
+Then install the required backend packages:
 
 ```bash
-./.venv/bin/python -m scripts.backend_smoke_test
+pip install numpy pandas scikit-learn joblib lightgbm xlrd fastapi uvicorn
+```
+
+This is enough for the default backend and GUI flow using `lightgbm`.
+
+> Optional:
+> If you want to use the `lstm` or `gru` models later, install TensorFlow:
+>
+> ```bash
+> pip install tensorflow
+> ```
+>
+> Otherwise, keep using `lightgbm`.
+
+---
+
+### 4. Prepare the topology files
+
+Run:
+
+```bash
+python scripts/prepare_real_topology.py
+```
+
+This regenerates the default routing topology files used by the system.
+
+---
+
+### 5. Run the backend smoke test
+
+Before launching the app, check that the backend is working correctly:
+
+```bash
+python -m scripts.backend_smoke_test
+```
+
+Expected output:
+
+```text
+All backend smoke checks passed.
 ```
 
 If this passes, the backend is ready.
 
-### 9. Start the backend API in Terminal 1
+---
+
+### 6. Start the backend server
+
+Run:
 
 ```bash
-./.venv/bin/python -m uvicorn webapi.server:app --reload --host 127.0.0.1 --port 8000
+uvicorn webapi.server:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Leave that terminal running.
+Expected output:
 
-### 10. Start the frontend in Terminal 2
+```text
+Uvicorn running on http://127.0.0.1:8000
+```
+
+Leave this terminal running.
+
+---
+
+### 7. Test the backend API
+
+Open this URL in your browser:
+
+```text
+http://127.0.0.1:8000/api/health
+```
+
+Expected response:
+
+```json
+{"status": "ok"}
+```
+
+You can also open the FastAPI docs here:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+---
+
+### 8. Install frontend dependencies
+
+Open a **new terminal**, then run:
 
 ```bash
 cd dashboard
+npm install
+```
+
+---
+
+### 9. Start the frontend
+
+Still inside the `dashboard` folder, run:
+
+```bash
 npm run dev
 ```
 
-### 11. Open the GUI in your browser
+Expected output:
+
+```text
+Local: http://localhost:5173/
+```
+
+---
+
+### 10. Open the web app
+
+Open this in your browser:
 
 ```text
 http://127.0.0.1:5173
 ```
 
-### 12. Use the GUI
+---
 
-In the web GUI:
-- enter an origin SCATS site ID
-- enter a destination SCATS site ID
-- keep the model as `lightgbm` unless you have installed extra dependencies
-- choose `top-k` from 1 to 5
+### 11. First GUI test
+
+In the web interface:
+
+- enter origin SCATS site ID: `2000`
+- enter destination SCATS site ID: `3002`
+- keep model as `lightgbm`
+- choose top-k as `1` or `5`
 - click the route button
 
-Good first test:
-- origin: `2000`
-- destination: `3002`
-- model: `lightgbm`
-- top-k: `1` or `5`
+This is the recommended first test for checking that the full stack works correctly.
 
-## If You Want To Use LSTM Or GRU Later
+---
 
-The GUI and API default to `lightgbm`. If you also want the `lstm` or `gru` models, install TensorFlow:
+## Testing the CLI
 
-```bash
-./.venv/bin/pip install tensorflow
-```
+This section is specifically for testing the command-line interface in `main.py`.
 
-Without TensorFlow, keep using `lightgbm`.
+Make sure:
+- the virtual environment is activated
+- backend dependencies are installed
+- topology files have already been prepared
 
-## Useful Commands After Setup
-
-### Run the CLI directly
-
-Single best route:
+### 1. Run the CLI for a single best route
 
 ```bash
-./.venv/bin/python main.py --origin 2000 --destination 3002 --model lightgbm
+python main.py --origin 2000 --destination 3002 --model lightgbm
 ```
 
-Top-k routes:
+This should compute and display the best route from SCATS site `2000` to `3002` using the `lightgbm` model.
+
+---
+
+### 2. Run the CLI for top-k routes
 
 ```bash
-./.venv/bin/python main.py --origin 2000 --destination 3002 --model lightgbm --top-k 5
+python main.py --origin 2000 --destination 3002 --model lightgbm --top-k 5
 ```
 
-### Run the model comparison script
+This should return the top 5 route options.
+
+---
+
+### 3. Recommended CLI test cases
+
+#### Test case 1: Single best route
 
 ```bash
-./.venv/bin/python compare_models.py
+python main.py --origin 2000 --destination 3002 --model lightgbm
 ```
 
-Save models while comparing:
+#### Test case 2: Top 5 routes
 
 ```bash
-./.venv/bin/python compare_models.py --save-models
+python main.py --origin 2000 --destination 3002 --model lightgbm --top-k 5
 ```
 
-### Load the saved default prediction bundle
+#### Test case 3: Different origin/destination pair
 
 ```bash
-./.venv/bin/python -c "from machine_learning.common.site_flow_service import load_default_prediction_bundle; bundle = load_default_prediction_bundle(); print(bundle['model_type'], bundle['window_size'])"
+python main.py --origin 2200 --destination 4034 --model lightgbm --top-k 3
 ```
+
+> Note:
+> Use valid SCATS site IDs that exist in the dataset and generated topology files.
+
+---
+
+### 4. What to check when testing CLI
+
+When the CLI runs successfully, verify that:
+- the command completes without crashing
+- a route is returned
+- origin and destination are processed correctly
+- changing `top-k` changes the number of route options
+- the model argument is accepted correctly
+
+---
+
+## Backend Testing
+
+### Backend smoke test
+
+```bash
+python -m scripts.backend_smoke_test
+```
+
+Expected output:
+
+```text
+All backend smoke checks passed.
+```
+
+### Health check endpoint
+
+Open in browser:
+
+```text
+http://127.0.0.1:8000/api/health
+```
+
+Expected response:
+
+```json
+{"status": "ok"}
+```
+
+### API docs
+
+Open in browser:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+---
 
 ## API Endpoints
 
-The FastAPI layer is thin and reuses the existing backend route pipeline through:
+The FastAPI layer reuses the existing backend route pipeline through:
+
 - `machine_learning.common.cli_route_service.compute_terminal_routes`
 
 Available endpoints:
@@ -172,13 +377,37 @@ Available endpoints:
 - `GET /api/config`
 - `POST /api/routes/compute`
 
-Example request:
+### Example request
 
 ```bash
 curl -X POST http://127.0.0.1:8000/api/routes/compute \
   -H "Content-Type: application/json" \
   -d '{"origin": 2000, "destination": 3002, "model": "lightgbm", "top_k": 3}'
 ```
+
+---
+
+## Useful Commands
+
+### Compare models
+
+```bash
+python compare_models.py
+```
+
+Save models while comparing:
+
+```bash
+python compare_models.py --save-models
+```
+
+### Load the saved default prediction bundle
+
+```bash
+python -c "from machine_learning.common.site_flow_service import load_default_prediction_bundle; bundle = load_default_prediction_bundle(); print(bundle['model_type'], bundle['window_size'])"
+```
+
+---
 
 ## Data Sources
 
@@ -191,49 +420,14 @@ curl -X POST http://127.0.0.1:8000/api/routes/compute \
   - the 40 SCATS site IDs present in the traffic dataset
 - `data/SCATSSiteListingSpreadsheet_VicRoads.xls/.xlsx` is not used directly in the active routing path
 
-## Project Structure
-
-```text
-cos30019-assignment-3/
-│
-├── .venv/                      # Python Virtual Environment (Backend)
-├── data/                       # Input Data
-│   ├── scats_data_october_2006.xls  # Historical traffic data
-│   ├── boroondara_locations.csv     # SCATS site locations
-│   └── boroondara_connectivity.csv  # Road network connectivity
-│
-├── frontend/                   # Web Interface (React + Vite)
-│   ├── src/                    # Source code
-│   ├── package.json            # Node.js configuration
-│   └── node_modules/           # Installed libraries
-│
-├── machine_learning/           # AI/ML Source Code
-│   ├── lstm.py                 # LSTM Model
-│   ├── gru.py                  # GRU Model
-│   ├── lightgbm.py             # LightGBM Model
-│   └── common/                 # Shared ML utilities
-│
-├── utils/                      # Utility functions (Calculations, Search)
-├── webapi/                     # Backend Server (FastAPI)
-│   └── server.py               # API entry point
-│
-├── main.py                     # CLI entry point for routing
-└── compare_models.py           # Script to train and compare models
-```
-
 ---
 
-## Key Features
+## Notes
 
-1.  **Traffic Prediction:** Uses 3 AI models (LSTM, GRU, LightGBM) to forecast traffic flow.
-2.  **Optimal Routing:** Finds fastest routes using A* and Uniform Cost Search algorithms.
-3.  **Interactive Web UI:** Map visualization, route comparison, and model performance charts.
-machine_learning/   Core ML pipeline, prediction, graph, problem, and route services
-utils/              Shared parsing, graph, search, and utility helpers
-webapi/             Thin FastAPI wrapper
-dashboard/           React + Vite frontend
-scripts/            Topology generation and backend smoke tests
-data/               Traffic data and topology inputs
-main.py             CLI entry point
-compare_models.py   Model comparison entry point
-```
+- You do not need to retrain the models to run the project.
+- For most users, `lightgbm` is the best default choice.
+- If TensorFlow is not installed, avoid selecting `lstm` or `gru`.
+- Start the backend before using the frontend.
+- Use two terminals:
+  - Terminal 1 for backend
+  - Terminal 2 for frontend
