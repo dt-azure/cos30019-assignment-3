@@ -90,6 +90,11 @@ Activate it:
 .\.venv\Scripts\Activate.ps1
 ```
 
+
+```MacOs(terminal)
+source .venv/bin/activate
+```
+
 You should see `(.venv)` at the start of your prompt.
 
 > **If you get an execution policy error**, run this first:
@@ -111,7 +116,7 @@ This installs: **pandas, numpy, lightgbm, scikit-learn, joblib, fastapi, pydanti
 
 Wait until you see `Successfully installed ...` and your cursor returns.
 
-> **Note:** `tensorflow` is NOT included. It is only needed if you want LSTM/GRU models (see [Step 13](#optional-use-lstm-or-gru-models)).
+> **Note:** `tensorflow` is NOT included. If you want LSTM/GRU models, please go to ([Step 13](#use-lstm-and-gru-models)).
 
 ---
 
@@ -130,6 +135,8 @@ Wait for the installation to complete (you'll see a summary of packages installe
 ---
 
 ## Step 6: Train & Save ML Models
+
+**Note:** If you see the `saved_models/` folder already has  `lstm.keras` or `gru.keras`, please skip this step.
 
 The backend needs trained models in the `saved_models/` folder to work. This step trains the LightGBM model and saves it.
 
@@ -297,7 +304,7 @@ The app has 2 parts that must run **at the same time**. Open **2 PowerShell wind
    ```
 4. You should see:
    ```
-   INFO: Uvicorn running on http://127.0.0.1:8000
+   INFO: Uvicorn running on http://127.0.0.1:8000/docs
    ```
 5. **Leave this window open.**
 
@@ -324,7 +331,7 @@ The app has 2 parts that must run **at the same time**. Open **2 PowerShell wind
 ## Step 11: Open the Browser
 
 1. Open your browser (Chrome, Edge, Firefox)
-2. Go to: **http://127.0.0.1:5173**
+2. Go to: **http://localhost:5173/**
 3. You should see the Traffic Route Guidance System home page
 
 ### How to Use
@@ -355,10 +362,7 @@ Get route results directly in the terminal:
 
 ---
 
-## Optional: Use LSTM or GRU Models
-
-The system defaults to `lightgbm`. If you also want `lstm` or `gru` models:
-
+## Use LSTM and GRU Models
 ### 1. Install TensorFlow
 ```powershell
 .\.venv\Scripts\python.exe -m pip install tensorflow
@@ -375,7 +379,7 @@ The system defaults to `lightgbm`. If you also want `lstm` or `gru` models:
 .\.venv\Scripts\python.exe main.py --origin 2000 --destination 3002 --model gru
 ```
 
-> Without TensorFlow, keep using `lightgbm` only. It is the fastest and recommended model.
+> You can refer back [Go to Step 5](#step-5-install-frontend-dependencies)
 
 ---
 
