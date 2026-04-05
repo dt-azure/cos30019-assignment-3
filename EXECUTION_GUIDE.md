@@ -4,18 +4,65 @@ This guide is written for beginners. Follow the steps one by one.
 
 ---
 
+## Prerequisites
+
+Make sure you have the following installed:
+
+- **Python 3.13+**  
+  Download: https://www.python.org/downloads/
+
+- **Node.js** (includes npm)  
+  Download: https://nodejs.org/en/download/current
+
+You can verify the installation with:
+
+```bash
+python3 --version
+npm --version
+```
+
 ## Step 1: Install Required Software
 
 You need 2 things on your computer:
 
-### 1. Python (already included in the project)
-The project comes with a Python environment in the `.venv` folder. You don't need to install anything else for Python.
+### 1. Create a Python virtual environment
+It is recommended to use a virtual environment for the backend.
+
+#### On macOS / Linux
+
+```bash
+python3 -m venv .venv
+```
+
+Activate it:
+
+```bash
+source .venv/bin/activate
+```
+
+#### On Windows (Command Prompt)
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+```
+
+#### On Windows (PowerShell)
+
+```bash
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+```
 
 ### 2. Node.js (for the Web interface)
 Open **PowerShell** and run this command to install automatically (no browser needed):
 
 ```powershell
 winget install OpenJS.NodeJS.LTS
+```
+
+```macos(terminal)
+brew install node
 ```
 
 After installation, **close PowerShell and reopen it** so the system recognizes the new commands.
