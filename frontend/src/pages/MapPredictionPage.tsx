@@ -117,11 +117,40 @@ export function MapPredictionPage() {
       const color = ROUTE_COLORS[idx % ROUTE_COLORS.length];
       
       const siteCoords: [number, number][] = [];
-      for (const siteId of route.path) {
+
+      for (let i = 0; i < route.path.length; i++) {
+        const siteId = route.path[i];
         const site = siteMap.get(siteId);
+
         if (site?.latitude != null && site?.longitude != null) {
-          siteCoords.push([site.latitude, site.longitude]);
-          allBounds.push([site.latitude, site.longitude]);
+          const latlng: [number, number] = [site.latitude, site.longitude];
+
+          siteCoords.push(latlng);
+          allBounds.push(latlng);
+
+          const isOrigin = i === 0;
+          const isDestination = i === route.path.length - 1;
+
+          let marker;
+
+          if (isOrigin) {
+            continue;
+          } else if (isDestination) {
+            continue;
+          } else {
+            marker = L.marker(latlng, { icon: L.divIcon({
+                className: "custom-marker",
+                html: `<div style="background:#03abff;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:12px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16],
+              }),
+            }).bindPopup(`<b>Node:</b> ${site.site_id}`);
+          }
+
+          if (marker) {
+            marker.addTo(mapRef.current!);
+            layersRef.current.push(marker);
+          }
         }
       }
 

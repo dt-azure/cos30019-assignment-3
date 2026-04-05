@@ -100,6 +100,7 @@ export function RouteMap({ sites, routes, origin, destination }: RouteMapProps) 
           .addTo(map);
       }
     }
+    
 
     // Draw route lines
     routes.forEach((route, index) => {
