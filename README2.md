@@ -44,10 +44,22 @@ pip install --upgrade pip
 pip install numpy pandas scikit-learn joblib lightgbm xlrd fastapi uvicorn
 ```
 
+Run backend smoke test:
+
+```bash
+python -m scripts.backend_smoke_test
+```
+
+Expected output:
+
+```
+All backend smoke checks passed.
+```
+
 ### 3. Run backend
 
 ```bash
-uvicorn webapi.server:app --reload
+uvicorn webapi.server:app --reload --host 127.0.0.1 --port 8000
 ```
 
 Execpted output:
