@@ -226,8 +226,17 @@ Wrote XXX directed edges to data/boroondara_connectivity.csv
 ```
 
 This creates/updates:
-- `data/boroondara_locations_snapped.csv` — 40 SCATS site coordinates
+- `data/boroondara_locations.csv` — 40 SCATS site coordinates
 - `data/boroondara_connectivity.csv` — road network edges with distances
+
+This generates updated coordinates for each location by adjusting them to actual map data:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/snap_map_coords.py
+```
+
+This creates/updates:
+- `data/boroondara_locations_snapped.csv` — boroondara_locations.csv updated with adjusted coordinates for each SCATS site
 
 ---
 
