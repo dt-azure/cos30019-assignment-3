@@ -2,6 +2,7 @@
 ***Backend***
 - FastAPI
 - Uvicorn
+- tensorflow
 - scikit-learn
 - LightGBM
 - pandas, numpy
@@ -41,7 +42,7 @@ Install backend dependencies:
 
 ```bash
 pip install --upgrade pip
-pip install numpy pandas scikit-learn joblib lightgbm xlrd fastapi uvicorn osmnx tqdm
+pip install numpy pandas tensorflow scikit-learn joblib lightgbm xlrd fastapi uvicorn osmnx tqdm
 ```
 
 Run backend smoke test:
