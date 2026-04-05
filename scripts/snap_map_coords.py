@@ -1,15 +1,20 @@
 import osmnx as ox
 import pandas as pd
-from tqdm import tqdm
+from tqdm import tqdm # tqdm library for visualizing a progress bar
+from pathlib import Path
+import sys
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from machine_learning.common.config import (
-    DEFAULT_TOPOLOGY_CONNECTIVITY_CSV,
+    DEFAULT_TOPOLOGY_LOCATIONS_CSV,
     SNAPPED_TOPOLOGY_LOCATIONS_CSV
 )
 
-# tqdm library for visualizing a progress bar
-
 def snap_scats_data(input_file, output_file):
+    print(input_file)
     df = pd.read_csv(input_file)
     
     snapped_lats = []
@@ -51,7 +56,7 @@ def snap_scats_data(input_file, output_file):
     print(f"\nDone! Cleaned data saved to {output_file}")
 
 def main():
-    snap_scats_data(f"data/{DEFAULT_TOPOLOGY_CONNECTIVITY_CSV}", f"data/{SNAPPED_TOPOLOGY_LOCATIONS_CSV}")
+    snap_scats_data(DEFAULT_TOPOLOGY_LOCATIONS_CSV, SNAPPED_TOPOLOGY_LOCATIONS_CSV)
 
 
 if __name__ == "__main__":
